@@ -5,11 +5,13 @@ class Vacancy < ApplicationRecord
 
     has_one :assessment
     has_many :vacancy_skills, dependent: :destroy
+    alias_attribute :skills, :vacancy_skills
+
     has_many :fit_gap_reports, dependent: :destroy
 
     validates :role_title, presence: true
 
-    alias_attribute :skills, :vacancy_skills
+
 
     accepts_nested_attributes_for :vacancy_skills, allow_destroy: true, reject_if: :all_blank
 

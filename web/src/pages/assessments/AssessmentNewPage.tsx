@@ -92,6 +92,11 @@ export default function AssessmentNewPage() {
             skill_label: "",
             is_custom: true,
             expected_level: 3,
+            l1_anchor: "",
+            l2_anchor: "",
+            l3_anchor: "",
+            l4_anchor: "",
+            l5_anchor: "",
             display_order: fields.length,
         });
     };
@@ -104,6 +109,7 @@ export default function AssessmentNewPage() {
     };
 
     const onSubmit = async (data: AssessmentFormValues) => {
+
         if (!data.vacancy_id) {
             setError("Please select a vacancy.");
             return;

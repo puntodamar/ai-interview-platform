@@ -23,17 +23,45 @@ module Api
             end
 
             def self.skill(skill, taxonomy)
-                {
-                    id: skill.id,
-                    skill_id: skill.skill_id,
-                    skill_label: skill.skill_label,
-                    expected_level: skill.expected_level,
-                    l1_anchor: taxonomy&.l1_anchor,
-                    l2_anchor: taxonomy&.l2_anchor,
-                    l3_anchor: taxonomy&.l3_anchor,
-                    l4_anchor: taxonomy&.l4_anchor,
-                    l5_anchor: taxonomy&.l5_anchor
-                }
+
+                if skill.skill_id.present?
+                    cache_key = [
+                        SkillTaxonomy.model_name.cache_key,
+                        'find_by_skill_id',
+                        SkillTaxonomy.cache_version
+                    ]
+
+                    skill_taxonomy = Rails.cache.fetch(cache_key, expires_in: 1.day) do
+                        SkillTaxonomy.find_by(skill_id: skill.skill_id)
+                    end
+
+                    {
+                        id: skill.id,
+                        skill_id: skill.skill_id,
+                        skill_label: skill.skill_label,
+                        expected_level: skill_taxonomy.expected_level,
+                        l1_anchor: taxonomy&.l1_anchor,
+                        l2_anchor: taxonomy&.l2_anchor,
+                        l3_anchor: taxonomy&.l3_anchor,
+                        l4_anchor: taxonomy&.l4_anchor,
+                        l5_anchor: taxonomy&.l5_anchor
+                    }
+
+                else
+                    {
+                        id: skill.id,
+                        skill_id: skill.skill_id,
+                        skill_label: skill.skill_label,
+                        l1_anchor: skill.l1_anchor,
+                        l2_anchor: skill.l2_anchor,
+                        l3_anchor: skill.l3_anchor,
+                        l4_anchor: skill.l4_anchor,
+                        l5_anchor: skill.l5_anchor
+                    }
+                end
+
+
+
             end
         end
     end

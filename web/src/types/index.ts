@@ -121,7 +121,7 @@ export interface Vacancy {
 
 export interface VacancySkill {
     id?: number;
-    skill_id?: number;
+    skill_id?: string;
     skill_label: string;
     expected_level: number;
     _destroy?: boolean;

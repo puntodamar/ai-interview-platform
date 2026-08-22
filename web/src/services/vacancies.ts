@@ -3,6 +3,7 @@ import type {PaginationMeta, Vacancy, VacancySkill} from "@/types";
 
 export interface VacancyPayload {
     role_title: string;
+    status: string;
     culture_dimensions: string;
     competency_expectations: string;
     vacancy_skills_attributes: Partial<VacancySkill>[];

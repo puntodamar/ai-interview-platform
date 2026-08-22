@@ -26,9 +26,23 @@ api.interceptors.request.use((config) => {
 // On 401/403, clear stored credentials and redirect to login.
 api.interceptors.response.use(
     (response) => {
-        if (response.data && typeof response.data === "object" && "data" in response.data) {
+        if (DEBUG && response.config.method?.toLowerCase() === "get") {
+            console.log(
+                "Response:",
+                response.config.method?.toUpperCase(),
+                response.config.url
+            );
+            console.log("Data:", response.data);
+        }
+
+        if (
+            response.data &&
+            typeof response.data === "object" &&
+            "data" in response.data
+        ) {
             response.data = response.data.data;
         }
+
         return response;
     },
     (error) => {
@@ -36,6 +50,7 @@ api.interceptors.response.use(
             clearToken();
             window.location.href = "/login";
         }
+
         return Promise.reject(error);
     }
 );

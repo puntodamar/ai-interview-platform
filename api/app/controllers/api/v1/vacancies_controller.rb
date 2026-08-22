@@ -64,7 +64,7 @@ module Api
 
                 result = Rails.cache.fetch(cache_key, expires_in: 1.day) do
                     vacancies = Vacancy
-                                    .where(status: Vacancy::STATUS.running)
+                                    .where(status: [Vacancy::STATUS.running, Vacancy::STATUS.draft])
                                     .order(:role_title)
 
                     {

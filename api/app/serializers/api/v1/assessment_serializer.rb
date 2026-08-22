@@ -22,14 +22,13 @@ module Api
 
             def self.detail_with_skills(assessment)
                 skills = assessment.skills.order(:display_order)
-
                 skill_ids = skills.filter_map(&:skill_id).uniq
-                taxonomy_map = SkillTaxonomy
-                                   .where(skill_id: skill_ids)
-                                   .index_by(&:skill_id)
+                taxonomy_map = SkillTaxonomy.where(skill_id: skill_ids).index_by(&:skill_id)
 
                 detail(assessment).merge(
                     skills: skills.map do |s|
+                        taxonomy = s.skill_id ? taxonomy_map[s.skill_id] : nil
+
                         merge = {
                             is_custom: s.is_custom,
                             scope_include: s.scope_include,
@@ -37,7 +36,7 @@ module Api
                             display_order: s.display_order
                         }
 
-                        skill(s, taxonomy_map[s.skill_id]).merge(merge)
+                        skill(s, taxonomy).merge(merge)
                     end
                 )
             end
