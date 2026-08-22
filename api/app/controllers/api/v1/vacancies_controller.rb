@@ -9,7 +9,29 @@ module Api
 
             # GET /api/v1/vacancies
             def index
-                vacancies = paginate(Vacancy.order(created_at: :desc))
+                vacancies = Vacancy.order(
+                    Arel.sql("CASE status WHEN 'running' THEN 1 WHEN 'draft' THEN 2 WHEN 'completed' THEN 3 END"),
+                    created_at: :desc
+                )
+                vacancies = vacancies.where(status: params[:status]) if params[:status].present?
+                if params[:q].present?
+                    q = "%#{params[:q]}%"
+                    
+                    # vacancies = vacancies.where(
+                    #     %w[role_title culture_dimensions competency_expectations]
+                    #         .map { |column| "#{column} ILIKE :q" }
+                    #         .join(' OR '),
+                    #     q: q
+                    # )
+
+                    vacancies = vacancies.where(
+                        'role_title ILIKE :q
+                         OR culture_dimensions ILIKE :q
+                         OR competency_expectations ILIKE :q',
+                        q: q
+                    )
+                end
+                vacancies = paginate(vacancies)
 
                 json_response(
                     vacancies: vacancies.map { |skill| ::Api::V1::VacancySerializer.list(skill) },
