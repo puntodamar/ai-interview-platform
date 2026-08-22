@@ -28,7 +28,6 @@ module Api
                 vacancy.created_by = current_user.id
 
                 if vacancy.save
-                    p ENV['APP_DEBUG']
                     if ENV['APP_DEBUG'].eql?('true')
                         json_response({ vacancy: ::Api::V1::VacancySerializer.detail_with_skills(vacancy) }, :created)
                     else
@@ -66,6 +65,7 @@ module Api
             def vacancy_params
                 params.require(:vacancy).permit(
                     :role_title,
+                    :status,
                     :culture_dimensions,
                     :competency_expectations,
                     vacancy_skills_attributes: %i[

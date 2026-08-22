@@ -8,7 +8,20 @@ class Vacancy < ApplicationRecord
 
     validates :role_title, presence: true
 
-    accepts_nested_attributes_for :vacancy_skills,
-                                  allow_destroy: true,
-                                  reject_if: :all_blank
+    accepts_nested_attributes_for :vacancy_skills, allow_destroy: true, reject_if: :all_blank
+
+    STATUS = Data.define(:draft, :running, :completed).new(
+        'draft',
+        'running',
+        'completed'
+    )
+
+    before_create :set_default_values
+
+    private
+
+    def set_default_values
+        self.status ||= STATUS.draft
+    end
+
 end

@@ -1,7 +1,7 @@
 module Api
     module V1
         class VacancySerializer
-            LIST_ATTRIBUTES = %i[id role_title].freeze
+            LIST_ATTRIBUTES = %i[id role_title status].freeze
 
             DETAIL_ATTRIBUTES = LIST_ATTRIBUTES + %i[
                 culture_dimensions
