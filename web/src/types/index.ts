@@ -108,6 +108,7 @@ export interface AssessorOverride {
 
 export interface Vacancy {
   id: number;
+  status: string,
   role_title: string;
   culture_dimensions: string;
   competency_expectations: string;

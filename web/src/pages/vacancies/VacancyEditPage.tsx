@@ -12,11 +12,13 @@ import SkillPicker from "@/components/assessment/SkillPicker";
 import { vacanciesApi } from "@/services/vacancies";
 import { ArrowLeft, Plus, X, Loader2 } from "lucide-react";
 import type { VacancySkill } from "@/types";
+import * as Select from "@radix-ui/react-select";
 
 interface VacancyFormValues {
   role_title: string;
   culture_dimensions: string;
   competency_expectations: string;
+  status: string;
   skills: Partial<VacancySkill>[];
 }
 
@@ -26,16 +28,22 @@ export default function VacancyEditPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const statuses = [
+    { value: "draft", label: "Draft" },
+    { value: "running", label: "Running" },
+    { value: "completed", label: "Completed" },
+  ];
+
 
   const { register, handleSubmit, control, setValue, watch, reset } = useForm<VacancyFormValues>({
-    defaultValues: { role_title: "", culture_dimensions: "", competency_expectations: "", skills: [] },
+    defaultValues: { status: "draft", role_title: "", culture_dimensions: "", competency_expectations: "", skills: [] },
   });
   const { fields, append, remove } = useFieldArray({ control, name: "skills" });
 
   useEffect(() => {
     vacanciesApi.get(Number(id)).then((res) => {
       const v = res.data.vacancy;
-      reset({ role_title: v.role_title, culture_dimensions: v.culture_dimensions, competency_expectations: v.competency_expectations, skills: v.skills });
+      reset({ status: v.status, role_title: v.role_title, culture_dimensions: v.culture_dimensions, competency_expectations: v.competency_expectations, skills: v.skills });
     }).catch(() => {}).finally(() => setLoading(false));
   }, [id, reset]);
 
@@ -44,6 +52,7 @@ export default function VacancyEditPage() {
     try {
       await vacanciesApi.update(Number(id), {
         role_title: data.role_title,
+        status: data.status,
         culture_dimensions: data.culture_dimensions,
         competency_expectations: data.competency_expectations,
         vacancy_skills_attributes: data.skills,
@@ -53,6 +62,8 @@ export default function VacancyEditPage() {
       setSubmitting(false);
     }
   };
+
+
 
   if (loading) return <div className="max-w-2xl mx-auto space-y-4"><Skeleton className="h-8 w-48" /><Skeleton className="h-10 w-full" /></div>;
 
@@ -67,6 +78,42 @@ export default function VacancyEditPage() {
         <div className="space-y-1.5">
           <Label>Role title <span className="text-destructive">*</span></Label>
           <Input {...register("role_title", { required: true })} />
+        </div>
+        <div className="space-y-1.5">
+          <Label>
+            Status <span className="text-destructive">*</span>
+          </Label>
+
+          <Select.Root
+              value={watch("status")}
+              onValueChange={(value) => setValue("status", value)}
+          >
+            <Select.Trigger
+                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm
+                ring-offset-background
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+                disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Select.Value placeholder="Select status" />
+              <Select.Icon />
+            </Select.Trigger>
+
+            <Select.Portal>
+              <Select.Content className="rounded-md border bg-background shadow-md">
+                <Select.Viewport className="p-1">
+                  {statuses.map((status) => (
+                    <Select.Item
+                      key={status.value}
+                      value={status.value}
+                      className="relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground hover:cursor-pointer"
+                    >
+                      <Select.ItemText>{status.label}</Select.ItemText>
+                    </Select.Item>
+                  ))}
+                </Select.Viewport>
+              </Select.Content>
+            </Select.Portal>
+          </Select.Root>
         </div>
         <Separator />
         <div className="space-y-3">

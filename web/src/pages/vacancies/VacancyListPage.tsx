@@ -57,8 +57,20 @@ export default function VacancyListPage() {
               <CardContent className="py-3 px-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Briefcase className="h-4 w-4 text-muted-foreground" />
-                  <p className="font-medium text-sm">{v.role_title}</p>
+                  <span className="font-medium text-sm">{v.role_title}</span>
+                  <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                          v.status === "running"
+                              ? "bg-blue-100 text-blue-700"
+                              : v.status === "draft"
+                                  ? "bg-gray-100 text-gray-700"
+                                  : "bg-blue-100 text-green-700"
+                      }`}
+                                  >
+                  {v.status}
+                </span>
                 </div>
+
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </CardContent>
             </Card>
