@@ -113,7 +113,7 @@ module Api
                     end
                 else
                     json_error(
-                        vacancy.errors.full_messages.first,
+                        vacancy.errors.full_messages.join(', '),
                         :unprocessable_entity
                     )
                 end
@@ -127,7 +127,7 @@ module Api
                     )
                 else
                     json_error(
-                        @vacancy.errors.full_messages.first,
+                        @vacancy.errors.full_messages.join(', '),
                         :unprocessable_entity
                     )
                 end
