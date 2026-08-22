@@ -12,10 +12,7 @@ module Api
                 cache_key = [
                     Vacancy.model_name,
                     'index',
-                    params[:status],
-                    params[:q],
-                    params[:page],
-                    params[:per_page]
+                    params.to_unsafe_h.sort.to_h
                 ]
 
                 result = Rails.cache.fetch(cache_key, expires_in: 1.hour) do
