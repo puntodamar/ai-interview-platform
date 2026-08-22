@@ -7,15 +7,18 @@ module Api
                 category = params[:category]
                 cache_key = [
                     SkillTaxonomy.model_name,
-                    category
+                    category,
+                    params.to_unsafe_h.sort.to_h
                 ]
+
+                full = params[:full].present?
 
                 skill_taxonomies = Rails.cache.fetch(cache_key, expires_in: 1.hour) do
                     skills = SkillTaxonomy.order(:skill_id)
                     skills = skills.where(category: category) if category.present?
 
                     skills.map do |skill|
-                        ::Api::V1::SkillTaxonomySerializer.list(skill)
+                        full ? ::Api::V1::SkillTaxonomySerializer.detail(skill) : ::Api::V1::SkillTaxonomySerializer.list(skill)
                     end
                 end
 

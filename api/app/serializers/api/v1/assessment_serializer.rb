@@ -11,25 +11,24 @@ module Api
                 updated_at
             ]
 
-            def assessment_with_skills_json(assessment)
-                assessment_json(assessment).merge(
-                    skills: assessment.assessment_skills.order(:display_order).map do |s|
-                        {
-                            id: s.id,
-                            skill_id: s.skill_id,
-                            skill_label: s.skill_label,
+            def detail_with_skills(assessment)
+                skills = assessment.skills.order(:display_order)
+
+                # Preload taxonomy anchors in one query to avoid N+1
+                skill_ids = skills.filter_map(&:skill_id).uniq
+                taxonomy_map = SkillTaxonomy.where(skill_id: skill_ids).index_by(&:skill_id)
+
+                detail(assessment).merge(
+                    skills: skills.map do |s|
+                        merge = {
                             is_custom: s.is_custom,
                             scope_include: s.scope_include,
                             scope_exclude: s.scope_exclude,
-                            l1_anchor: s.l1_anchor,
-                            l2_anchor: s.l2_anchor,
-                            l3_anchor: s.l3_anchor,
-                            l4_anchor: s.l4_anchor,
-                            l5_anchor: s.l5_anchor,
-                            expected_level: s.expected_level,
                             display_order: s.display_order
                         }
+                        skill(s, taxonomy_map[s.skill_id]).merge(merge)
                     end
+
                 )
             end
 
