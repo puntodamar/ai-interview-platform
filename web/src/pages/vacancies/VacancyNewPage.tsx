@@ -302,13 +302,15 @@ export default function VacancyNewPage() {
             <SkillPicker
                 open={pickerOpen}
                 onOpenChange={setPickerOpen}
-                onSelect={(s) =>
+                onSelect={function (skill) {
+                    console.log(skill)
                     append({
-                        skill_id: s.skill_id,
-                        skill_label: s.skill_label,
+                        skill_taxonomy_id: skill.id,
+                        skill_label: skill.skill_label,
                         expected_level: 3,
-                    })
-                }
+                    });
+
+                }}
             />
         </div>
     );

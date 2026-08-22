@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 class SkillTaxonomy < ApplicationRecord
+    has_many :vacancy_skills, dependent: :destroy
+    has_many :assessment_skills
+    has_many :vacancies, through: :vacancy_skills
+
     validates :skill_id, presence: true, uniqueness: true, length: { maximum: 50 }
     validates :skill_label, presence: true, length: { maximum: 255 }
     validates :category, presence: true, length: { maximum: 50 }

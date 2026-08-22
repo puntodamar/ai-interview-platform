@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_08_22_084959) do
+ActiveRecord::Schema[7.0].define(version: 2026_08_22_160736) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -27,8 +27,6 @@ ActiveRecord::Schema[7.0].define(version: 2026_08_22_084959) do
 
   create_table "assessment_skills", force: :cascade do |t|
     t.bigint "assessment_id", null: false
-    t.string "skill_id", limit: 50
-    t.string "skill_label", limit: 255, null: false
     t.boolean "is_custom", default: false, null: false
     t.text "scope_include"
     t.text "scope_exclude"
@@ -39,7 +37,10 @@ ActiveRecord::Schema[7.0].define(version: 2026_08_22_084959) do
     t.text "l5_anchor", null: false
     t.integer "expected_level"
     t.integer "display_order", default: 0, null: false
+    t.bigint "skill_taxonomy_id"
+    t.string "skill_label"
     t.index ["assessment_id"], name: "index_assessment_skills_on_assessment_id"
+    t.index ["skill_taxonomy_id"], name: "index_assessment_skills_on_skill_taxonomy_id"
     t.check_constraint "expected_level >= 1 AND expected_level <= 5", name: "chk_assessment_skills_expected_level"
   end
 
@@ -200,14 +201,15 @@ ActiveRecord::Schema[7.0].define(version: 2026_08_22_084959) do
 
   create_table "vacancy_skills", force: :cascade do |t|
     t.bigint "vacancy_id", null: false
-    t.string "skill_id", limit: 50
-    t.string "skill_label", limit: 255, null: false
     t.integer "expected_level", null: false
+    t.bigint "skill_taxonomy_id"
+    t.index ["skill_taxonomy_id"], name: "index_vacancy_skills_on_skill_taxonomy_id"
     t.index ["vacancy_id"], name: "index_vacancy_skills_on_vacancy_id"
     t.check_constraint "expected_level >= 1 AND expected_level <= 5", name: "chk_vacancy_skills_expected_level"
   end
 
   add_foreign_key "assessment_skills", "assessments"
+  add_foreign_key "assessment_skills", "skill_taxonomies"
   add_foreign_key "assessments", "vacancies"
   add_foreign_key "assessor_overrides", "portfolio_skills"
   add_foreign_key "coverage_maps", "sessions"
@@ -217,5 +219,6 @@ ActiveRecord::Schema[7.0].define(version: 2026_08_22_084959) do
   add_foreign_key "portfolios", "sessions"
   add_foreign_key "sessions", "assessments"
   add_foreign_key "transcript_turns", "sessions"
+  add_foreign_key "vacancy_skills", "skill_taxonomies"
   add_foreign_key "vacancy_skills", "vacancies"
 end

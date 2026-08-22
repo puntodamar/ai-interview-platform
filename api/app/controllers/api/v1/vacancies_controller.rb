@@ -164,8 +164,7 @@ module Api
                     :competency_expectations,
                     vacancy_skills_attributes: %i[
                         id
-                        skill_id
-                        skill_label
+                        skill_taxonomy_id
                         expected_level
                         _destroy
                     ]

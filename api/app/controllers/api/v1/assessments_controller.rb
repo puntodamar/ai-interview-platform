@@ -100,7 +100,7 @@ module Api
                     :time_limit_min,
                     :language,
                     assessment_skills_attributes: %i[
-                        id skill_id skill_label is_custom
+                        id skill_taxonomy_id is_custom
                         scope_include scope_exclude
                         l1_anchor l2_anchor l3_anchor l4_anchor l5_anchor
                         expected_level display_order _destroy

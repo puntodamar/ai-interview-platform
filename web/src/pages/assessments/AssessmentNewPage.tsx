@@ -92,6 +92,8 @@ export default function AssessmentNewPage() {
             skill_label: "",
             is_custom: true,
             expected_level: 3,
+            scope_include: "",
+            scope_exclude: "",
             l1_anchor: "",
             l2_anchor: "",
             l3_anchor: "",
@@ -101,9 +103,20 @@ export default function AssessmentNewPage() {
         });
     };
 
-    const addB7Skill = (skill: Partial<AssessmentSkill>) => {
+    const addB7Skill = function (skill: Partial<AssessmentSkill>) {
         append({
-            ...skill,
+            skill_taxonomy_id: skill.skill_taxonomy_id ?? skill.id,
+            skill_id: skill.skill_id,
+            skill_label: skill.skill_label,
+            is_custom: false,
+            expected_level: skill.expected_level ?? 3,
+            scope_include: skill.scope_include,
+            scope_exclude: skill.scope_exclude,
+            l1_anchor: skill.l1_anchor,
+            l2_anchor: skill.l2_anchor,
+            l3_anchor: skill.l3_anchor,
+            l4_anchor: skill.l4_anchor,
+            l5_anchor: skill.l5_anchor,
             display_order: fields.length,
         });
     };
@@ -128,7 +141,7 @@ export default function AssessmentNewPage() {
                 vacancy_id: data.vacancy_id,
                 time_limit_min: data.time_limit_min,
                 language: data.language,
-                assessment_skills_attributes: data.skills.map((s, i) => ({
+                assessment_skills_attributes: data.skills.map(({id, ...s}, i) => ({
                     ...s,
                     display_order: i,
                 })),

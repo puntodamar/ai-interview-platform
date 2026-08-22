@@ -4,14 +4,18 @@ class Vacancy < ApplicationRecord
     include TenantScoped
 
     has_one :assessment
+
     has_many :vacancy_skills, dependent: :destroy
-    alias_attribute :skills, :vacancy_skills
+    has_many :skill_taxonomies, through: :vacancy_skills
 
     has_many :fit_gap_reports, dependent: :destroy
 
     validates :role_title, presence: true
 
-    accepts_nested_attributes_for :vacancy_skills, allow_destroy: true, reject_if: :all_blank
+    accepts_nested_attributes_for :vacancy_skills,
+                                  allow_destroy: true,
+                                  reject_if: :all_blank
+
 
     after_commit :invalidate_cache
 

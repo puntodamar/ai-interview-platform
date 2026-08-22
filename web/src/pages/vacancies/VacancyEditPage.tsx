@@ -11,7 +11,7 @@ import LevelRadio from "@/components/assessment/LevelRadio";
 import SkillPicker from "@/components/assessment/SkillPicker";
 import {vacanciesApi} from "@/services/vacancies";
 import {ArrowLeft, Loader2, Plus, X} from "lucide-react";
-import type {VacancySkill} from "@/types";
+import type {AssessmentSkill, VacancySkill} from "@/types";
 import * as Select from "@radix-ui/react-select";
 
 interface VacancyFormValues {
@@ -56,11 +56,14 @@ export default function VacancyEditPage() {
     const {fields, append, remove} = useFieldArray({
         control,
         name: "skills",
+        keyName: "fieldId",
     });
 
     const status = watch("status");
 
     useEffect(() => {
+        if (!id) return;
+
         vacanciesApi
             .get(Number(id))
             .then((res) => {
@@ -75,11 +78,54 @@ export default function VacancyEditPage() {
                 });
             })
             .catch(() => {
+                // handle error if needed
             })
             .finally(() => setLoading(false));
     }, [id, reset]);
 
+    const handleRemoveSkill = (index: number) => {
+        const skill = watch(`skills.${index}`);
+
+        console.log("Removing skill:", skill);
+
+        if (skill?.id) {
+            setValue(
+                `skills.${index}._destroy`,
+                true,
+                {
+                    shouldDirty: true,
+                }
+            );
+        } else {
+            remove(index);
+        }
+    };
+
+    /**
+     * Add a new skill.
+     */
+    const handleAddSkill = (skill: Partial<AssessmentSkill>) => {
+        const skills = watch("skills");
+
+        const isDuplicate = skills.some(
+            (existingSkill) =>
+                existingSkill.skill_taxonomy_id === skill.id
+        );
+
+        if (isDuplicate) {
+            return;
+        }
+
+        append({
+            skill_label: skill.skill_label,
+            skill_taxonomy_id: skill.id,
+            expected_level: skill.expected_level ?? 3,
+        });
+    };
+
     const onSubmit = async (data: VacancyFormValues) => {
+        if (!id) return;
+
         setSubmitting(true);
 
         try {
@@ -88,6 +134,7 @@ export default function VacancyEditPage() {
                 status: data.status,
                 culture_dimensions: data.culture_dimensions,
                 competency_expectations: data.competency_expectations,
+
                 vacancy_skills_attributes: data.skills,
             });
 
@@ -125,6 +172,7 @@ export default function VacancyEditPage() {
                 onSubmit={handleSubmit(onSubmit)}
                 className="space-y-6"
             >
+                {/* Role title */}
                 <div className="space-y-1.5">
                     <Label>
                         Role title{" "}
@@ -132,10 +180,13 @@ export default function VacancyEditPage() {
                     </Label>
 
                     <Input
-                        {...register("role_title", {required: true})}
+                        {...register("role_title", {
+                            required: true,
+                        })}
                     />
                 </div>
 
+                {/* Status */}
                 <div className="space-y-1.5">
                     <Label>
                         Status{" "}
@@ -163,13 +214,17 @@ export default function VacancyEditPage() {
                             "
                         >
                             <Select.Value placeholder="Select status"/>
-
                             <Select.Icon/>
                         </Select.Trigger>
 
                         <Select.Portal>
                             <Select.Content
-                                className="rounded-md border bg-background shadow-md"
+                                className="
+                                    rounded-md
+                                    border
+                                    bg-background
+                                    shadow-md
+                                "
                             >
                                 <Select.Viewport className="p-1">
                                     {statuses.map((item) => (
@@ -200,40 +255,54 @@ export default function VacancyEditPage() {
 
                 <Separator/>
 
+                {/* Skills */}
                 <div className="space-y-3">
                     <Label>Expected skills</Label>
 
-                    {fields.map((field, index) => (
-                        <div
-                            key={field.id}
-                            className="border rounded-lg p-3 space-y-2"
-                        >
-                            <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">
-                {field.skill_label}
-            </span>
+                    {fields.map((field, index) => {
+                        const skill = watch(`skills.${index}`);
 
-                                <button
-                                    type="button"
-                                    onClick={() => remove(index)}
-                                    className="text-muted-foreground hover:text-destructive"
-                                >
-                                    <X className="h-4 w-4"/>
-                                </button>
+                        if (skill?._destroy) {
+                            return null;
+                        }
+
+                        return (
+                            <div
+                                key={field.fieldId}
+                                className="border rounded-lg p-3 space-y-2"
+                            >
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm font-medium">
+                                        {skill?.skill_label}
+                                    </span>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => handleRemoveSkill(index)}
+                                        className="
+                                            text-muted-foreground
+                                            hover:text-destructive
+                                        "
+                                    >
+                                        <X className="h-4 w-4"/>
+                                    </button>
+                                </div>
+
+                                <LevelRadio
+                                    value={skill?.expected_level ?? 3}
+                                    onChange={(value) =>
+                                        setValue(
+                                            `skills.${index}.expected_level`,
+                                            value,
+                                            {
+                                                shouldDirty: true,
+                                            }
+                                        )
+                                    }
+                                />
                             </div>
-
-                            <LevelRadio
-                                value={field.expected_level ?? 3}
-                                onChange={(v) =>
-                                    setValue(
-                                        `skills.${index}.expected_level`,
-                                        v,
-                                        {shouldDirty: true}
-                                    )
-                                }
-                            />
-                        </div>
-                    ))}
+                        );
+                    })}
 
                     <Button
                         type="button"
@@ -248,6 +317,7 @@ export default function VacancyEditPage() {
 
                 <Separator/>
 
+                {/* Company culture */}
                 <div className="space-y-1.5">
                     <Label>Company culture</Label>
 
@@ -257,6 +327,7 @@ export default function VacancyEditPage() {
                     />
                 </div>
 
+                {/* Competency expectations */}
                 <div className="space-y-1.5">
                     <Label>Competency expectations</Label>
 
@@ -266,6 +337,7 @@ export default function VacancyEditPage() {
                     />
                 </div>
 
+                {/* Actions */}
                 <div className="flex justify-end gap-2">
                     <Button
                         type="button"
@@ -291,13 +363,7 @@ export default function VacancyEditPage() {
             <SkillPicker
                 open={pickerOpen}
                 onOpenChange={setPickerOpen}
-                onSelect={(s) =>
-                    append({
-                        skill_id: s.skill_id,
-                        skill_label: s.skill_label,
-                        expected_level: 3,
-                    })
-                }
+                onSelect={handleAddSkill}
             />
         </div>
     );

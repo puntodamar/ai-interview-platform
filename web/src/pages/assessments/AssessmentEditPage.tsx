@@ -42,7 +42,7 @@ export default function AssessmentEditPage() {
         },
     });
 
-    const {handleSubmit, control, setValue, reset} = form;
+    const {handleSubmit, control, setValue, watch, reset} = form;
     const {fields, append, remove, move} = useFieldArray({
         control,
         name: "skills",
@@ -215,6 +215,33 @@ export default function AssessmentEditPage() {
                     </Select>
                 </div>
 
+                <div className="space-y-1.5">
+                    <Label>Interview language</Label>
+
+                    <Select
+                        value={watch("language")}
+                        onValueChange={(value) =>
+                            setValue("language", value as "en" | "id", {
+                                shouldDirty: true,
+                            })
+                        }
+                    >
+                        <SelectTrigger className="w-40">
+                            <SelectValue placeholder="Select language"/>
+                        </SelectTrigger>
+
+                        <SelectContent>
+                            <SelectItem value="en">
+                                English
+                            </SelectItem>
+
+                            <SelectItem value="id">
+                                Indonesian
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
                 <Separator/>
 
                 <div className="space-y-3">
@@ -267,6 +294,7 @@ export default function AssessmentEditPage() {
                             onClick={() =>
                                 append({
                                     skill_label: "",
+                                    scope_include: "",
                                     is_custom: true,
                                     expected_level: 3,
                                     display_order: fields.length,

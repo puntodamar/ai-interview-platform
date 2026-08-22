@@ -16,10 +16,11 @@ export interface Assessment {
 }
 
 export interface AssessmentSkill {
+    skill_taxonomy_id?: number;
     id?: number;
     skill_id?: string;
-    skill_label: string;
-    is_custom: boolean;
+    skill_label?: string;
+    is_custom?: boolean;
     expected_level: number;
     display_order: number;
     scope_include?: string;
@@ -121,8 +122,9 @@ export interface Vacancy {
 
 export interface VacancySkill {
     id?: number;
-    skill_id?: string;
-    skill_label: string;
+    is_custom?: boolean;
+    skill_taxonomy_id?: number;
+    skill_label?: string;
     expected_level: number;
     _destroy?: boolean;
 }
@@ -149,6 +151,7 @@ export interface FitGapReport {
 }
 
 export interface SkillTaxonomy {
+    id: number,
     skill_id: string;
     skill_label: string;
     category: string;

@@ -2,8 +2,8 @@
 
 class VacancySkill < ApplicationRecord
     belongs_to :vacancy
+    belongs_to :skill_taxonomy
 
-    validates :skill_label, presence: true
     validates :expected_level, numericality: { only_integer: true, in: 1..5 }
 
     CACHE_VERSION_KEY = 'vacancy-skill:index:version'

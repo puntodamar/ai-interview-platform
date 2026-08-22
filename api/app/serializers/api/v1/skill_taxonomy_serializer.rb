@@ -2,7 +2,7 @@
 module Api
     module V1
         class SkillTaxonomySerializer < BaseSerializer
-            LIST_ATTRIBUTES = %i[skill_id skill_label category].freeze
+            LIST_ATTRIBUTES = %i[id skill_id skill_label category].freeze
 
             DETAIL_ATTRIBUTES = LIST_ATTRIBUTES + %i[
                 scope_include
