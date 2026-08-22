@@ -17,7 +17,8 @@ module Api
                 assessment.attributes
                           .slice(*LIST_ATTRIBUTES.map(&:to_s))
                           .merge(
-                              name: assessment.vacancy&.role_title
+                              name: assessment.vacancy&.role_title,
+                              vacancy_status: assessment.vacancy&.status,
                           )
             end
 
@@ -27,6 +28,7 @@ module Api
                 assessment.attributes
                           .slice(*DETAIL_ATTRIBUTES.map(&:to_s))
                           .merge(
+                              vacancy_status: assessment.vacancy&.status,
                               name: assessment.vacancy&.role_title,
                               latest_session: latest && {
                                   id: latest.id,

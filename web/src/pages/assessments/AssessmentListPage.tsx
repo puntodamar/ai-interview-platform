@@ -10,6 +10,8 @@ import type {Assessment} from "@/types";
 function SessionSummary({session}: { session?: Assessment["latest_session"] }) {
     if (!session) return null;
 
+    console.log(session)
+
     if (session.status === "active")
         return (
             <span className="flex items-center gap-1 text-xs text-primary">
@@ -78,7 +80,18 @@ export default function AssessmentListPage() {
                         >
                             <CardContent className="py-3 px-4 flex items-center justify-between">
                                 <div>
-                                    <p className="font-medium text-sm">{a.name}</p>
+                                    <span className="font-medium text-sm">{a.name}</span>
+                                    <span
+                                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                            a.vacancy_status === "running"
+                                                ? "bg-blue-100 text-blue-700"
+                                                : a.vacancy_status === "draft"
+                                                    ? "bg-gray-100 text-gray-700"
+                                                    : "bg-blue-100 text-green-700"
+                                        }`}
+                                    >
+                                      {a.vacancy_status}
+                                    </span>
                                     <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                                         <span className="flex items-center gap-1">
                                             <Clock className="h-3 w-3"/>

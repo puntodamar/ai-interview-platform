@@ -2,6 +2,7 @@ export interface Assessment {
     id: number;
     vacancy_id: number;
     name: string;
+    vacancy_status: string;
     time_limit_min: number;
     language?: "en" | "id";
     system_prompt?: string;
@@ -17,7 +18,9 @@ export interface Assessment {
 
 export interface AssessmentSkill {
     skill_taxonomy_id?: number;
+    status?: string;
     id?: number;
+    vacancy_status?: string;
     skill_id?: string;
     skill_label?: string;
     is_custom?: boolean;

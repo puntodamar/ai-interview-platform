@@ -17,8 +17,14 @@ module Api
                 ]
 
                 result = Rails.cache.fetch(cache_key, expires_in: 1.day) do
-                    assessments = paginate(Assessment.includes(:sessions, :vacancy).order(created_at: :desc))
-
+                    assessments = paginate(Assessment.includes(:sessions, :vacancy)
+                                               .joins(:vacancy)
+                                               .order(
+                                                   Arel.sql(
+                                                       "CASE WHEN vacancies.status = '#{Vacancy::STATUS.completed}' THEN 1 ELSE 0 END"
+                                                   ),
+                                                   created_at: :desc
+                                               ))
                     {
                         assessments: assessments.map { |skill| ::Api::V1::AssessmentSerializer.list(skill) },
                         meta: ::Api::V1::AssessmentSerializer.pagination_meta(assessments)
