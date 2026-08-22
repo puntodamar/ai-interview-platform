@@ -36,7 +36,7 @@ export default function SkillPicker({open, onOpenChange, onSelect}: SkillPickerP
 
     const handleSelect = (s: SkillTaxonomy) => {
         onSelect({
-            skill_id: undefined,
+            skill_id: s.skill_id,
             skill_label: s.skill_label,
             is_custom: false,
             expected_level: 3,
