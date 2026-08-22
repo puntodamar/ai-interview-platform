@@ -5,6 +5,7 @@ import {authAtom, clearToken} from "@/stores/authAtom";
 import {Button} from "@/components/ui/button";
 import {Briefcase, ClipboardList, LayoutDashboard, LogOut} from "lucide-react";
 import {cn} from "@/lib/utils";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
 const navItems = [
     {href: "/assessments", label: "Assessments", icon: ClipboardList},
@@ -31,7 +32,7 @@ export default function AssessorLayout() {
                     <div className="flex items-center gap-6">
                         <Link to="/assessments" className="flex items-center gap-2">
                             <LayoutDashboard className="h-5 w-5 text-primary"/>
-                            <span className="font-semibold text-sm">Rakamin AI Interview</span>
+                            <span className="hidden md:block font-semibold text-sm">Rakamin AI Interview</span>
                         </Link>
                         <nav className="flex items-center gap-1">
                             {navItems.map(({href, label, icon: Icon}) => (
@@ -51,17 +52,28 @@ export default function AssessorLayout() {
                             ))}
                         </nav>
                     </div>
-                    <div className="flex items-center gap-3">
-                        {tenant.name && (
-                            <span className="text-xs text-muted-foreground border rounded-full px-2.5 py-0.5">
-                Tenant: {tenant.name}
-              </span>
-                        )}
-                        <Button variant="ghost" size="sm" onClick={handleLogout}>
-                            <LogOut className="h-4 w-4 mr-1.5"/>
-                            Logout
-                        </Button>
-                    </div>
+                    <DropdownMenu.Root>
+                        <DropdownMenu.Trigger asChild>
+                            <button className="text-xs text-muted-foreground border rounded-full px-2.5 py-0.5 hover:bg-accent">
+                                {tenant.name}
+                            </button>
+                        </DropdownMenu.Trigger>
+
+                        <DropdownMenu.Portal>
+                            <DropdownMenu.Content
+                                align="end"
+                                className="z-50 min-w-40 mt-2 rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+                            >
+                                <DropdownMenu.Item
+                                    onClick={handleLogout}
+                                    className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent focus:text-accent-foreground"
+                                >
+                                    <LogOut className="mr-2 h-4 w-4" />
+                                    Logout
+                                </DropdownMenu.Item>
+                            </DropdownMenu.Content>
+                        </DropdownMenu.Portal>
+                    </DropdownMenu.Root>
                 </div>
             </header>
 
