@@ -88,7 +88,7 @@ module Api
 
                 result = Rails.cache.fetch(cache_key, expires_in: 1.day) do
                     {
-                        vacancy: ::Api::V1::VacancySerializer.detail_with_skills(@vacancy.id)
+                        vacancy: ::Api::V1::VacancySerializer.detail_with_skills(@vacancy)
                     }
                 end
 
