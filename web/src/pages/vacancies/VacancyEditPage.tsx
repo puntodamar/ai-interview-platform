@@ -13,6 +13,7 @@ import {vacanciesApi} from "@/services/vacancies";
 import {ArrowLeft, Loader2, Plus, X} from "lucide-react";
 import type {AssessmentSkill, VacancySkill} from "@/types";
 import * as Select from "@radix-ui/react-select";
+import NotFound from "@/components/NotFound.tsx";
 
 interface VacancyFormValues {
     role_title: string;
@@ -29,7 +30,8 @@ export default function VacancyEditPage() {
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [pickerOpen, setPickerOpen] = useState(false);
-
+    const [vacancies, setVacancies] = useState<any[]>([]);
+    const [vacancy, setVacancy] = useState<any | null>(null);
     const statuses = [
         {value: "draft", label: "Draft"},
         {value: "running", label: "Running"},
@@ -68,7 +70,7 @@ export default function VacancyEditPage() {
             .get(Number(id))
             .then((res) => {
                 const v = res.data.vacancy;
-
+                setVacancy(v);
                 reset({
                     status: v.status || "draft",
                     role_title: v.role_title || "",
@@ -151,6 +153,10 @@ export default function VacancyEditPage() {
                 <Skeleton className="h-10 w-full"/>
             </div>
         );
+    }
+
+    if(!vacancy) {
+        return <NotFound backTo="/vacancies" message="Vacancy not found." />;
     }
 
     return (

@@ -52,7 +52,7 @@ module Api
                 assessment.created_by = current_user.id
 
                 if assessment.save
-                    SystemPromptGeneratorWorker.perform_async(assessment.id)
+                    # SystemPromptGeneratorWorker.perform_async(assessment.id)
                     json_response({ assessment:, system_prompt_generated: true }, :created)
                 else
                     json_error(assessment.errors.full_messages.first, :unprocessable_entity)
@@ -62,7 +62,7 @@ module Api
             # PUT /api/v1/assessments/:id
             def update
                 if @assessment.update(assessment_params)
-                    SystemPromptGeneratorWorker.perform_async(@assessment.id)
+                    # SystemPromptGeneratorWorker.perform_async(@assessment.id)
                     json_response({ assessment: AssessmentSerializer.detail_with_skills(@assessment),
                                     system_prompt_generated: true })
                 else

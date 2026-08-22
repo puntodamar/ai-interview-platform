@@ -11,6 +11,7 @@ import {assessmentsApi} from "@/services/assessments";
 import {LEVEL_LABELS} from "@/utils/constants";
 import {ArrowLeft, Check, Clock, Copy, Eye, Pencil, Plus, UserRound} from "lucide-react";
 import type {Assessment, Session} from "@/types";
+import NotFound from "@/components/NotFound.tsx";
 
 function SessionRow({
                         session,
@@ -194,6 +195,10 @@ export default function AssessmentInvitePage() {
         );
     }
 
+    if(!assessment){
+        return <NotFound backTo="/assessments" message="Assessment not found." />;
+    }
+
     return (
         <div className="max-w-2xl mx-auto space-y-6">
             {/* Header */}
@@ -202,6 +207,7 @@ export default function AssessmentInvitePage() {
                     <Link to="/assessments" className="text-muted-foreground hover:text-foreground">
                         <ArrowLeft className="h-4 w-4"/>
                     </Link>
+
                     <div>
                         <h1 className="text-lg font-semibold">{assessment?.name ?? "—"}</h1>
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
