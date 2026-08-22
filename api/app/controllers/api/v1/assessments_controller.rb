@@ -14,14 +14,16 @@ module Api
                 )
 
                 json_response(
-                    assessments: assessments.map(&method(:assessment_json)),
-                    meta: pagination_meta(assessments)
+                    assessments: assessments.map { |skill| ::Api::V1::AssessmentSerializer.list(skill) },
+                    meta: ::Api::V1::AssessmentSerializer.pagination_meta(assessments)
                 )
             end
 
             # GET /api/v1/assessments/:id
             def show
-                json_response(assessment: assessment_with_skills_json(@assessment))
+                json_response(
+                    assessment: ::Api::V1::AssessmentSerializer.detail_with_skills(@assessment)
+                )
             end
 
             # POST /api/v1/assessments
@@ -116,15 +118,6 @@ module Api
                         }
                     end
                 )
-            end
-
-            def pagination_meta(collection)
-                {
-                    current_page: collection.current_page,
-                    total_pages: collection.total_pages,
-                    total_count: collection.total_count,
-                    per_page: collection.limit_value
-                }
             end
         end
     end
