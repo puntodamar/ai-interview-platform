@@ -11,4 +11,15 @@ class SkillTaxonomy < ApplicationRecord
     validates :l5_anchor, presence: true
 
     CATEGORIES = %w[engineering soft_skills product_process].freeze
+
+    CACHE_VERSION_KEY = 'skill-taxonomy:index:version'
+
+    def self.invalidate_cache
+        Rails.cache.write(CACHE_VERSION_KEY, SecureRandom.uuid)
+        Rails.cache.delete([cache_key, id])
+    end
+
+    def self.cache_version
+        Rails.cache.fetch(CACHE_VERSION_KEY) { SecureRandom.uuid }
+    end
 end

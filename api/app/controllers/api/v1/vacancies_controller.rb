@@ -10,15 +10,20 @@ module Api
             # GET /api/v1/vacancies
             def index
                 cache_key = [
-                    Vacancy.model_name,
+                    Vacancy.model_name.cache_key,
                     'index',
-                    params.to_unsafe_h.sort.to_h
+                    params.to_unsafe_h.sort.to_h,
+                    Vacancy.cache_version
                 ]
 
-                result = Rails.cache.fetch(cache_key, expires_in: 1.hour) do
+                result = Rails.cache.fetch(cache_key, expires_in: 1.day) do
                     vacancies = Vacancy.order(
                         Arel.sql(
-                            "CASE status WHEN 'running' THEN 1 WHEN 'draft' THEN 2 WHEN 'completed' THEN 3 END"
+                            "CASE status
+                             WHEN 'running' THEN 1
+                             WHEN 'draft' THEN 2
+                             WHEN 'completed' THEN 3
+                             END"
                         ),
                         created_at: :desc
                     )
@@ -49,13 +54,45 @@ module Api
                 json_response(result)
             end
 
-            # GET /api/v1/vacancies/:id
-            def show
-                vacancy = Rails.cache.fetch([Vacancy.model_name, @vacancy.id], expires_in: 1.hour) do
-                    ::Api::V1::VacancySerializer.detail_with_skills(@vacancy)
+            # GET /api/v1/vacancies/options
+            def options
+                cache_key = [
+                    Vacancy.model_name.cache_key,
+                    'options',
+                    Vacancy.cache_version
+                ]
+
+                result = Rails.cache.fetch(cache_key, expires_in: 1.day) do
+                    vacancies = Vacancy
+                                    .where(status: Vacancy::STATUS.running)
+                                    .order(:role_title)
+
+                    {
+                        vacancies: vacancies.map do |vacancy|
+                            ::Api::V1::VacancySerializer.list(vacancy)
+                        end
+                    }
                 end
 
-                json_response(vacancy: vacancy)
+                json_response(result)
+            end
+
+            # GET /api/v1/vacancies/:id
+            def show
+                cache_key = [
+                    Vacancy.model_name.cache_key,
+                    'show',
+                    params[:id],
+                    Vacancy.cache_version
+                ]
+
+                result = Rails.cache.fetch(cache_key, expires_in: 1.day) do
+                    {
+                        vacancy: ::Api::V1::VacancySerializer.detail_with_skills(@vacancy.id)
+                    }
+                end
+
+                json_response(result)
             end
 
             # POST /api/v1/vacancies
@@ -75,35 +112,46 @@ module Api
                         json_response({ success: true })
                     end
                 else
-                    json_error(vacancy.errors.full_messages.first, :unprocessable_entity)
+                    json_error(
+                        vacancy.errors.full_messages.first,
+                        :unprocessable_entity
+                    )
                 end
             end
 
             # PUT /api/v1/vacancies/:id
             def update
                 if @vacancy.update(vacancy_params)
-                    Rails.cache.delete([Vacancy.model_name, @vacancy.id])
-
                     json_response(
                         vacancy: ::Api::V1::VacancySerializer.detail_with_skills(@vacancy)
                     )
                 else
-                    json_error(@vacancy.errors.full_messages.first, :unprocessable_entity)
+                    json_error(
+                        @vacancy.errors.full_messages.first,
+                        :unprocessable_entity
+                    )
                 end
             end
 
             # DELETE /api/v1/vacancies/:id
             def destroy
-                vacancy_id = @vacancy.id
                 @vacancy.destroy
-                Rails.cache.delete([Vacancy.model_name, vacancy_id])
+
                 json_response(message: 'Vacancy deleted')
             end
 
             private
 
             def set_vacancy
-                @vacancy = Vacancy.find(params[:id])
+                cache_key = [
+                    Vacancy.model_name.cache_key,
+                    params[:id],
+                    Vacancy.cache_version
+                ]
+
+                @vacancy = Rails.cache.fetch(cache_key, expires_in: 1.day) do
+                    Vacancy.find(params[:id])
+                end
             rescue ActiveRecord::RecordNotFound
                 json_error('Vacancy not found', :not_found)
             end
@@ -115,7 +163,11 @@ module Api
                     :culture_dimensions,
                     :competency_expectations,
                     vacancy_skills_attributes: %i[
-                        id skill_id skill_label expected_level _destroy
+                        id
+                        skill_id
+                        skill_label
+                        expected_level
+                        _destroy
                     ]
                 )
             end

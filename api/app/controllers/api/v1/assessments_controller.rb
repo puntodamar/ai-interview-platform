@@ -9,21 +9,41 @@ module Api
 
             # GET /api/v1/assessments
             def index
-                assessments = paginate(
-                    Assessment.includes(:sessions).order(created_at: :desc)
-                )
+                cache_key = [
+                    Assessment.model_name.cache_key,
+                    'index',
+                    params.to_unsafe_h.sort.to_h,
+                    Assessment.cache_version
+                ]
 
-                json_response(
-                    assessments: assessments.map { |skill| ::Api::V1::AssessmentSerializer.list(skill) },
-                    meta: ::Api::V1::AssessmentSerializer.pagination_meta(assessments)
-                )
+                result = Rails.cache.fetch(cache_key, expires_in: 1.day) do
+                    assessments = paginate(Assessment.includes(:sessions, :vacancy).order(created_at: :desc))
+
+                    {
+                        assessments: assessments.map { |skill| ::Api::V1::AssessmentSerializer.list(skill) },
+                        meta: ::Api::V1::AssessmentSerializer.pagination_meta(assessments)
+                    }
+                end
+
+                json_response(result)
             end
 
             # GET /api/v1/assessments/:id
             def show
-                json_response(
-                    assessment: ::Api::V1::AssessmentSerializer.detail_with_skills(@assessment)
-                )
+                cache_key = [
+                    Assessment.model_name.cache_key,
+                    'show',
+                    params[:id],
+                    Assessment.cache_version
+                ]
+
+                result = Rails.cache.fetch(cache_key, expires_in: 1.day) do
+                    {
+                        assessment: ::Api::V1::AssessmentSerializer.detail_with_skills(@assessment)
+                    }
+                end
+
+                json_response(result)
             end
 
             # POST /api/v1/assessments
@@ -59,14 +79,24 @@ module Api
             private
 
             def set_assessment
-                @assessment = Assessment.find(params[:id])
+
+                cache_key = [
+                    Assessment.model_name.cache_key,
+                    params[:id],
+                    Assessment.cache_version
+                ]
+
+                @assessment = Rails.cache.fetch(cache_key, expires_in: 1.day) do
+                    Assessment.find(params[:id])
+                end
+
             rescue ActiveRecord::RecordNotFound
                 json_error('Assessment not found', :not_found)
             end
 
             def assessment_params
                 params.require(:assessment).permit(
-                    :name,
+                    :vacancy_id,
                     :time_limit_min,
                     :language,
                     assessment_skills_attributes: %i[
