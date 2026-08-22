@@ -45,6 +45,7 @@ export default function AssessmentListPage() {
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <h1 className="text-xl font-semibold">Assessments</h1>
+
                 <Button onClick={() => navigate("/assessments/new")}>
                     <Plus className="h-4 w-4 mr-1.5"/> New Assessment
                 </Button>
@@ -79,10 +80,10 @@ export default function AssessmentListPage() {
                                 <div>
                                     <p className="font-medium text-sm">{a.name}</p>
                                     <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3"/>
-                        {a.time_limit_min} min
-                    </span>
+                                        <span className="flex items-center gap-1">
+                                            <Clock className="h-3 w-3"/>
+                                                {a.time_limit_min} min
+                                        </span>
                                         {a.latest_session && (
                                             <>
                                                 <span>·</span>

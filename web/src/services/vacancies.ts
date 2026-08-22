@@ -17,6 +17,8 @@ export const vacanciesApi = {
     get: (id: number) =>
         api.get<{ vacancy: Vacancy }>(`/vacancies/${id}`),
 
+    options: () => api.get<{ vacancies: Vacancy[] }>("/vacancies/options"),
+
     create: (data: VacancyPayload) =>
         api.post<{ vacancy: Vacancy }>("/vacancies", {vacancy: data}),
 

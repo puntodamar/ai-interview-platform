@@ -2,7 +2,8 @@ import api from "./api";
 import type {Assessment, AssessmentSkill, PaginationMeta, Session} from "@/types";
 
 export interface AssessmentPayload {
-    name: string;
+    // name: string;
+    vacancy_id: number;
     time_limit_min: number;
     language?: "en" | "id";
     assessment_skills_attributes: Partial<AssessmentSkill>[];

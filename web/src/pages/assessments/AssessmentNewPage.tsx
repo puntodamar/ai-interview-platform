@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useFieldArray, useForm} from "react-hook-form";
 import {Link, useNavigate} from "react-router-dom";
 import {
@@ -12,7 +12,6 @@ import {
 } from "@dnd-kit/core";
 import {SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy,} from "@dnd-kit/sortable";
 import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {Separator} from "@/components/ui/separator";
@@ -20,11 +19,12 @@ import SkillCard from "@/components/assessment/SkillCard";
 import SkillPicker from "@/components/assessment/SkillPicker";
 import {ArrowLeft, Loader2, Plus} from "lucide-react";
 import {assessmentsApi} from "@/services/assessments";
+import {vacanciesApi} from "@/services/vacancies";
 import {TIME_LIMIT_OPTIONS} from "@/utils/constants";
 import type {AssessmentSkill} from "@/types";
 
 export interface AssessmentFormValues {
-    name: string;
+    vacancy_id: number;
     time_limit_min: number;
     language: "en" | "id";
     skills: Partial<AssessmentSkill>[];
@@ -35,29 +35,54 @@ export default function AssessmentNewPage() {
     const [submitting, setSubmitting] = useState(false);
     const [pickerOpen, setPickerOpen] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [vacancies, setVacancies] = useState<any[]>([]);
+
+    useEffect(() => {
+        vacanciesApi
+            .options()
+            .then((res) => {
+                setVacancies(res.data.vacancies);
+            })
+            .catch(() => {
+                setError("Failed to load vacancies.");
+            });
+    }, []);
 
     const form = useForm<AssessmentFormValues>({
         defaultValues: {
-            name: "",
+            vacancy_id: 0,
             time_limit_min: 45,
             language: "en",
             skills: [],
         },
     });
 
-    const {register, handleSubmit, control, setValue, watch, formState: {errors}} = form;
-    const {fields, append, remove, move} = useFieldArray({control, name: "skills"});
+    const {
+        handleSubmit,
+        control,
+        setValue,
+        watch,
+    } = form;
+
+    const {fields, append, remove, move} = useFieldArray({
+        control,
+        name: "skills",
+    });
 
     const sensors = useSensors(
         useSensor(PointerSensor),
-        useSensor(KeyboardSensor, {coordinateGetter: sortableKeyboardCoordinates})
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates
+        })
     );
 
     const handleDragEnd = (event: DragEndEvent) => {
         const {active, over} = event;
+
         if (over && active.id !== over.id) {
             const oldIndex = fields.findIndex((f) => f.id === active.id);
             const newIndex = fields.findIndex((f) => f.id === over.id);
+
             move(oldIndex, newIndex);
         }
     };
@@ -72,19 +97,29 @@ export default function AssessmentNewPage() {
     };
 
     const addB7Skill = (skill: Partial<AssessmentSkill>) => {
-        append({...skill, display_order: fields.length});
+        append({
+            ...skill,
+            display_order: fields.length,
+        });
     };
 
     const onSubmit = async (data: AssessmentFormValues) => {
+        if (!data.vacancy_id) {
+            setError("Please select a vacancy.");
+            return;
+        }
+
         if (data.skills.length === 0) {
             setError("Add at least one skill to continue.");
             return;
         }
+
         setError(null);
         setSubmitting(true);
+
         try {
             const payload = {
-                name: data.name,
+                vacancy_id: data.vacancy_id,
                 time_limit_min: data.time_limit_min,
                 language: data.language,
                 assessment_skills_attributes: data.skills.map((s, i) => ({
@@ -92,10 +127,15 @@ export default function AssessmentNewPage() {
                     display_order: i,
                 })),
             };
+
             const res = await assessmentsApi.create(payload);
+
             navigate(`/assessments/${res.data.assessment.id}/invite`);
         } catch (e: any) {
-            setError(e?.response?.data?.errors?.[0]?.message ?? "Failed to save assessment.");
+            setError(
+                e?.response?.data?.errors?.[0]?.message ??
+                "Failed to save assessment."
+            );
         } finally {
             setSubmitting(false);
         }
@@ -105,28 +145,52 @@ export default function AssessmentNewPage() {
         <div className="max-w-2xl mx-auto">
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 mb-6">
-                <Link to="/assessments" className="text-muted-foreground hover:text-foreground">
+                <Link
+                    to="/assessments"
+                    className="text-muted-foreground hover:text-foreground"
+                >
                     <ArrowLeft className="h-4 w-4"/>
                 </Link>
-                <span className="text-sm text-muted-foreground">Back</span>
-                <span className="text-sm text-muted-foreground">/</span>
-                <span className="text-sm font-medium">New Assessment</span>
+
+                <span className="text-sm text-muted-foreground">
+                    Back
+                </span>
+
+                <span className="text-sm text-muted-foreground">
+                    /
+                </span>
+
+                <span className="text-sm font-medium">
+                    New Assessment
+                </span>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                {/* Role title */}
+                {/* Vacancy */}
                 <div className="space-y-1.5">
-                    <Label htmlFor="name">
-                        Role title <span className="text-destructive">*</span>
+                    <Label>
+                        Vacancy <span className="text-destructive">*</span>
                     </Label>
-                    <Input
-                        id="name"
-                        placeholder="Senior Frontend Engineer"
-                        {...register("name", {required: "Role title is required"})}
-                    />
-                    {errors.name && (
-                        <p className="text-xs text-destructive">{errors.name.message}</p>
-                    )}
+
+                    <Select
+                        value={String(watch("vacancy_id"))}
+                        onValueChange={(v) => setValue("vacancy_id", Number(v))}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select vacancy"/>
+                        </SelectTrigger>
+
+                        <SelectContent>
+                            {vacancies.map((vacancy) => (
+                                <SelectItem
+                                    key={vacancy.id}
+                                    value={String(vacancy.id)}
+                                >
+                                    {vacancy.role_title}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </div>
 
                 {/* Time limit */}
@@ -134,16 +198,21 @@ export default function AssessmentNewPage() {
                     <Label>
                         Session time limit <span className="text-destructive">*</span>
                     </Label>
+
                     <Select
-                        defaultValue="45"
+                        value={String(watch("time_limit_min"))}
                         onValueChange={(v) => setValue("time_limit_min", Number(v))}
                     >
                         <SelectTrigger className="w-40">
                             <SelectValue/>
                         </SelectTrigger>
+
                         <SelectContent>
                             {TIME_LIMIT_OPTIONS.map((min) => (
-                                <SelectItem key={min} value={String(min)}>
+                                <SelectItem
+                                    key={min}
+                                    value={String(min)}
+                                >
                                     {min} min
                                 </SelectItem>
                             ))}
@@ -154,16 +223,23 @@ export default function AssessmentNewPage() {
                 {/* Language */}
                 <div className="space-y-1.5">
                     <Label>Interview language</Label>
+
                     <Select
-                        defaultValue="en"
+                        value={watch("language")}
                         onValueChange={(v) => setValue("language", v as "en" | "id")}
                     >
                         <SelectTrigger className="w-40">
                             <SelectValue/>
                         </SelectTrigger>
+
                         <SelectContent>
-                            <SelectItem value="en">English</SelectItem>
-                            <SelectItem value="id">Indonesian</SelectItem>
+                            <SelectItem value="en">
+                                English
+                            </SelectItem>
+
+                            <SelectItem value="id">
+                                Indonesian
+                            </SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -176,8 +252,13 @@ export default function AssessmentNewPage() {
 
                     {fields.length === 0 ? (
                         <div className="border rounded-lg p-6 text-center text-sm text-muted-foreground">
-                            <p className="mb-1">No skills added yet.</p>
-                            <p>Add at least one skill to continue.</p>
+                            <p className="mb-1">
+                                No skills added yet.
+                            </p>
+
+                            <p>
+                                Add at least one skill to continue.
+                            </p>
                         </div>
                     ) : (
                         <DndContext
@@ -214,6 +295,7 @@ export default function AssessmentNewPage() {
                             <Plus className="h-3.5 w-3.5 mr-1"/>
                             Add from Skill Taxonomy
                         </Button>
+
                         <Button
                             type="button"
                             variant="outline"
@@ -229,7 +311,9 @@ export default function AssessmentNewPage() {
                 <Separator/>
 
                 {error && (
-                    <p className="text-sm text-destructive">{error}</p>
+                    <p className="text-sm text-destructive">
+                        {error}
+                    </p>
                 )}
 
                 {/* Actions */}
@@ -241,8 +325,15 @@ export default function AssessmentNewPage() {
                     >
                         Cancel
                     </Button>
-                    <Button type="submit" disabled={submitting}>
-                        {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin"/>}
+
+                    <Button
+                        type="submit"
+                        disabled={submitting}
+                    >
+                        {submitting && (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin"/>
+                        )}
+
                         Save &amp; Create Session →
                     </Button>
                 </div>

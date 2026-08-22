@@ -1,5 +1,6 @@
 export interface Assessment {
     id: number;
+    vacancy_id: number;
     name: string;
     time_limit_min: number;
     language?: "en" | "id";
@@ -16,7 +17,7 @@ export interface Assessment {
 
 export interface AssessmentSkill {
     id?: number;
-    skill_id?: number;
+    skill_id?: string;
     skill_label: string;
     is_custom: boolean;
     expected_level: number;
