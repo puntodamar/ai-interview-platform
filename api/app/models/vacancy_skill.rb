@@ -5,4 +5,15 @@ class VacancySkill < ApplicationRecord
 
     validates :skill_label, presence: true
     validates :expected_level, numericality: { only_integer: true, in: 1..5 }
+
+    CACHE_VERSION_KEY = 'vacancy-skill:index:version'
+
+    def self.cache_version
+        Rails.cache.fetch(CACHE_VERSION_KEY) { SecureRandom.uuid }
+    end
+
+    def self.invalidate_cache
+        Rails.cache.write(CACHE_VERSION_KEY, SecureRandom.uuid)
+        Rails.cache.delete([cache_key, id])
+    end
 end

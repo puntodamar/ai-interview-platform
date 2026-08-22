@@ -11,9 +11,9 @@ class Vacancy < ApplicationRecord
 
     validates :role_title, presence: true
 
-
-
     accepts_nested_attributes_for :vacancy_skills, allow_destroy: true, reject_if: :all_blank
+
+    after_commit :invalidate_cache
 
 
     STATUS = Data.define(:draft, :running, :completed).new(
@@ -30,7 +30,7 @@ class Vacancy < ApplicationRecord
         Rails.cache.fetch(CACHE_VERSION_KEY) { SecureRandom.uuid }
     end
 
-    def self.invalidate_cache
+    def invalidate_cache
         Rails.cache.write(CACHE_VERSION_KEY, SecureRandom.uuid)
         Rails.cache.delete([cache_key, id])
     end

@@ -20,27 +20,6 @@ module Api
                           )
             end
 
-            def self.detail_with_skills(assessment)
-                skills = assessment.skills.order(:display_order)
-                skill_ids = skills.filter_map(&:skill_id).uniq
-                taxonomy_map = SkillTaxonomy.where(skill_id: skill_ids).index_by(&:skill_id)
-
-                detail(assessment).merge(
-                    skills: skills.map do |s|
-                        taxonomy = s.skill_id ? taxonomy_map[s.skill_id] : nil
-
-                        merge = {
-                            is_custom: s.is_custom,
-                            scope_include: s.scope_include,
-                            scope_exclude: s.scope_exclude,
-                            display_order: s.display_order
-                        }
-
-                        skill(s, taxonomy).merge(merge)
-                    end
-                )
-            end
-
             def self.detail(assessment)
                 latest = assessment.sessions.max_by(&:created_at)
 
@@ -54,6 +33,36 @@ module Api
                                   end_reason: latest.end_reason
                               }
                           )
+            end
+
+            def self.detail_with_skills(assessment)
+                skills = assessment.skills.order(:display_order)
+                detail(assessment).merge(
+                    skills: skills.map do |s|
+                        merge = {
+                            is_custom: s.is_custom,
+                            scope_include: s.scope_include,
+                            scope_exclude: s.scope_exclude,
+                            display_order: s.display_order
+                        }
+                        skill(s).merge(merge)
+                    end
+                )
+            end
+
+
+
+            def self.skill(skill)
+                {
+                    id: skill.id,
+                    skill_id: skill.skill_id,
+                    skill_label: skill.skill_label,
+                    l1_anchor: skill.l1_anchor,
+                    l2_anchor: skill.l2_anchor,
+                    l3_anchor: skill.l3_anchor,
+                    l4_anchor: skill.l4_anchor,
+                    l5_anchor: skill.l5_anchor
+                }
             end
         end
     end
