@@ -13,21 +13,21 @@ export default function TranscriptBubble({
                                              createdAt,
                                              audioStartMs,
                                          }: TranscriptBubbleProps) {
+
     const isCandidate = speaker === "candidate";
 
-    let timestamp = null;
-    let formattedTime = null;
+    const formatAudioTime = (milliseconds: number) => {
+        const totalSeconds = Math.floor(milliseconds / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        const ms = milliseconds % 1000;
 
-    if(createdAt && audioStartMs) {
-        timestamp = new Date(new Date(createdAt).getTime() + audioStartMs);
-        formattedTime = timestamp.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-        });
+        return `${minutes.toString().padStart(2, "0")}:${seconds
+            .toString()
+            .padStart(2, "0")}.${ms.toString().padStart(3, "0")}`;
+    };
 
-
-    }
+    const formattedTime = audioStartMs !== undefined ? formatAudioTime(audioStartMs) : null;
 
     return (
         <div className={cn("flex", isCandidate ? "justify-end" : "justify-start")}>
@@ -51,11 +51,12 @@ export default function TranscriptBubble({
                     <div>{text}</div>
                     {formattedTime && (
                         <span
-                            className={`text-[10px] ${
+                            className={cn(
+                                "text-[10px]",
                                 isCandidate
                                     ? "text-primary-foreground/70 self-end"
                                     : "text-muted-foreground"
-                            }`}
+                            )}
                         >
                             {formattedTime}
                         </span>
