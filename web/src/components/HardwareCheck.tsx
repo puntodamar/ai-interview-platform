@@ -88,6 +88,20 @@ const HardwareCheck: React.FC<HardwareCheckProps> = ({onStart}) => {
         }
     };
 
+    const withTimeout = <T,>(
+        promise: Promise<T>,
+        timeoutMs: number
+    ): Promise<T> => {
+        return Promise.race([
+            promise,
+            new Promise<T>((_, reject) => {
+                setTimeout(() => {
+                    reject(new Error("Operation timed out"));
+                }, timeoutMs);
+            }),
+        ]);
+    };
+
     const startAudioLevelMonitoring = (stream: MediaStream) => {
         try {
             const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
@@ -145,9 +159,16 @@ const HardwareCheck: React.FC<HardwareCheckProps> = ({onStart}) => {
         const micLoading = !REQUIRE_CAMERA && progress.microphone === ProctoringState.LOADING;
         if (!cameraLoading && !micLoading) return;
 
+        // const getStream = REQUIRE_CAMERA
+        //     ? checkCamera()
+        //     : navigator.mediaDevices.getUserMedia({audio: true}).catch(() => null);
+
         const getStream = REQUIRE_CAMERA
-            ? checkCamera()
-            : navigator.mediaDevices.getUserMedia({audio: true}).catch(() => null);
+            ? withTimeout(checkCamera(), 15_000).catch(() => null)
+            : withTimeout(
+                navigator.mediaDevices.getUserMedia({audio: true}),
+                15_000
+            ).catch(() => null);
 
         getStream.then((stream) => {
             if (stream) {
