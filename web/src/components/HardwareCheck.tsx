@@ -68,16 +68,16 @@ const HardwareCheck: React.FC<HardwareCheckProps> = ({onStart}) => {
         }, 800);
     };
 
-    // useEffect(() => {
-    //     const {osAndBrowser, internet, camera, audio, microphone} = progress;
-    //     setAllPassed(
-    //         osAndBrowser === ProctoringState.PASSED &&
-    //         internet === ProctoringState.PASSED &&
-    //         camera === ProctoringState.PASSED &&
-    //         audio === ProctoringState.PASSED &&
-    //         microphone === ProctoringState.PASSED
-    //     );
-    // }, [progress]);
+    useEffect(() => {
+        const {osAndBrowser, internet, camera, audio, microphone} = progress;
+        setAllPassed(
+            osAndBrowser === ProctoringState.PASSED &&
+            internet === ProctoringState.PASSED &&
+            camera === ProctoringState.PASSED &&
+            audio === ProctoringState.PASSED &&
+            microphone === ProctoringState.PASSED
+        );
+    }, [progress]);
 
     useEffect(() => {
         runOsAndBrowserCheck();
