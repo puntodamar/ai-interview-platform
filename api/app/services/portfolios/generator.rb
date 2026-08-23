@@ -154,9 +154,10 @@ module Portfolios
             portfolio.portfolio_skills.destroy_all
 
             (data['configured_skills'] || []).each do |skill_data|
+                p skill_data['skill_id']
+                skill_taxonomy = SkillTaxonomy.find_by_skill_id(skill_data['skill_id']) || SkillTaxonomy.find_by_skill_label(skill_data['skill_label'])
                 portfolio.portfolio_skills.create!(
-                    skill_id: skill_data['skill_id'],
-                    skill_label: skill_data['skill_label'],
+                    skill_taxonomy_id: skill_taxonomy.id,
                     is_discovered: false,
                     ai_level: skill_data['level'].to_i.clamp(1, 5),
                     ai_confidence: skill_data['confidence'],
