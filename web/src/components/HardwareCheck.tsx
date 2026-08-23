@@ -47,6 +47,7 @@ const HardwareCheck: React.FC<HardwareCheckProps> = ({onStart}) => {
     const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
     const [audioLevel, setAudioLevel] = useState<number>(0);
     const videoRef = useRef<HTMLVideoElement>(null);
+    const audioMonitoringRef = useRef<number | null>(null);
 
     const runOsAndBrowserCheck = () => {
         setProgress((p) => ({
@@ -88,6 +89,7 @@ const HardwareCheck: React.FC<HardwareCheckProps> = ({onStart}) => {
 
     useEffect(() => {
         return () => {
+            stopAudioLevelMonitoring();
             videoStream?.getTracks().forEach((t) => t.stop());
         };
     }, [videoStream]);
@@ -125,22 +127,61 @@ const HardwareCheck: React.FC<HardwareCheckProps> = ({onStart}) => {
         ]);
     };
 
+    const stopAudioLevelMonitoring = () => {
+        if (audioMonitoringRef.current !== null) {
+            cancelAnimationFrame(audioMonitoringRef.current);
+            audioMonitoringRef.current = null;
+        }
+    };
+
+    // const startAudioLevelMonitoring = (stream: MediaStream) => {
+    //     try {
+    //         const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    //         const ctx = new AudioCtx();
+    //         const source = ctx.createMediaStreamSource(stream);
+    //         const analyser = ctx.createAnalyser();
+    //         analyser.fftSize = 256;
+    //         source.connect(analyser);
+    //         const data = new Uint8Array(analyser.frequencyBinCount);
+    //         const update = () => {
+    //             analyser.getByteFrequencyData(data);
+    //             setAudioLevel(Math.round(data.reduce((a, b) => a + b, 0) / data.length));
+    //             requestAnimationFrame(update);
+    //         };
+    //         update();
+    //     } catch { /* silent */
+    //     }
+    // };
+
     const startAudioLevelMonitoring = (stream: MediaStream) => {
+        stopAudioLevelMonitoring();
+
         try {
             const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
             const ctx = new AudioCtx();
             const source = ctx.createMediaStreamSource(stream);
             const analyser = ctx.createAnalyser();
+
             analyser.fftSize = 256;
             source.connect(analyser);
+
             const data = new Uint8Array(analyser.frequencyBinCount);
+
             const update = () => {
                 analyser.getByteFrequencyData(data);
-                setAudioLevel(Math.round(data.reduce((a, b) => a + b, 0) / data.length));
-                requestAnimationFrame(update);
+
+                setAudioLevel(
+                    Math.round(
+                        data.reduce((a, b) => a + b, 0) / data.length
+                    )
+                );
+
+                audioMonitoringRef.current = requestAnimationFrame(update);
             };
+
             update();
-        } catch { /* silent */
+        } catch {
+            // silent
         }
     };
 
@@ -225,6 +266,7 @@ const HardwareCheck: React.FC<HardwareCheckProps> = ({onStart}) => {
     }, [progress.audio]);
 
     const retryAll = () => {
+        stopAudioLevelMonitoring();
         videoStream?.getTracks().forEach((t) => t.stop());
         setVideoStream(null);
         setInternetResult(null);
