@@ -1,5 +1,5 @@
 import api from "./api";
-import type {Assessment, AssessmentSkill, PaginationMeta, Session} from "@/types";
+import type {Assessment, AssessmentSkill, PaginationMeta, Session, StatusCount} from "@/types";
 
 export interface AssessmentPayload {
     // name: string;
@@ -11,7 +11,7 @@ export interface AssessmentPayload {
 
 export const assessmentsApi = {
     list: (page = 1) =>
-        api.get<{ assessments: Assessment[]; meta: PaginationMeta }>("/assessments", {
+        api.get<{ assessments: Assessment[]; meta: PaginationMeta, counters: StatusCount }>("/assessments", {
             params: {page},
         }),
 

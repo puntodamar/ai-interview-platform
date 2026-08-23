@@ -44,9 +44,12 @@ module Api
                     vacancies = paginate(vacancies)
 
                     {
-                        vacancies: vacancies.map do |vacancy|
-                            ::Api::V1::VacancySerializer.list(vacancy)
-                        end,
+                        vacancies: vacancies.map { |vacancy|  ::Api::V1::VacancySerializer.list(vacancy)},
+                        counters: {
+                            running: Vacancy.where(status: Vacancy::STATUS.running).count,
+                            completed: Vacancy.where(status: Vacancy::STATUS.completed).count,
+                            draft: Vacancy.where(status: Vacancy::STATUS.draft).count,
+                        },
                         meta: ::Api::V1::VacancySerializer.pagination_meta(vacancies)
                     }
                 end

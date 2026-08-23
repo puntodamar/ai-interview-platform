@@ -26,8 +26,13 @@ module Api
                                                    created_at: :desc
                                                ))
                     {
-                        assessments: assessments.map { |skill| ::Api::V1::AssessmentSerializer.list(skill) },
-                        meta: ::Api::V1::AssessmentSerializer.pagination_meta(assessments)
+                        assessments: assessments.map { |assessment| ::Api::V1::AssessmentSerializer.list(assessment) },
+                        counters: {
+                            running: Assessment.joins(:vacancy).where(vacancies: { status: Vacancy::STATUS.running }).count,
+                            completed: Assessment.joins(:vacancy).where(vacancies: { status: Vacancy::STATUS.completed }).count,
+                            draft: Assessment.joins(:vacancy).where(vacancies: { status: Vacancy::STATUS.draft }).count,
+                        },
+                        meta: ::Api::V1::AssessmentSerializer.pagination_meta(assessments),
                     }
                 end
 

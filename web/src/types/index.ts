@@ -18,6 +18,12 @@ export interface Assessment {
     };
 }
 
+export interface StatusCount {
+    running: number;
+    draft: number;
+    completed: number;
+}
+
 export interface AssessmentSkill {
     skill_taxonomy_id?: number;
     status?: string;

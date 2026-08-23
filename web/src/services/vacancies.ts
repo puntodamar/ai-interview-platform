@@ -1,5 +1,5 @@
 import api from "./api";
-import type {PaginationMeta, Vacancy, VacancySkill} from "@/types";
+import type {PaginationMeta, StatusCount, Vacancy, VacancySkill} from "@/types";
 
 export interface VacancyPayload {
     role_title: string;
@@ -11,7 +11,7 @@ export interface VacancyPayload {
 
 export const vacanciesApi = {
     list: (page = 1) =>
-        api.get<{ vacancies: Vacancy[]; meta: PaginationMeta }>("/vacancies", {
+        api.get<{ vacancies: Vacancy[]; meta: PaginationMeta, counters: StatusCount }>("/vacancies", {
             params: {page},
         }),
 

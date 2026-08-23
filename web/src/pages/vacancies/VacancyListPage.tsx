@@ -1,32 +1,92 @@
-import {useEffect, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {Button} from "@/components/ui/button";
 import {Card, CardContent} from "@/components/ui/card";
+import {Input} from "@/components/ui/input";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import {Skeleton} from "@/components/ui/skeleton";
 import {vacanciesApi} from "@/services/vacancies";
-import {Briefcase, ChevronRight, Plus} from "lucide-react";
-import type {Vacancy} from "@/types";
+import {Briefcase, ChevronRight, Plus, Search} from "lucide-react";
+import type {StatusCount, Vacancy} from "@/types";
 
 export default function VacancyListPage() {
     const [vacancies, setVacancies] = useState<Vacancy[]>([]);
+    const [statusCounter, setStatusCounter] = useState<StatusCount>({ running: 0, draft: 0, completed: 0 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
+    const [search, setSearch] = useState("");
+    const [statusFilter, setStatusFilter] = useState("running");
     const navigate = useNavigate();
 
     useEffect(() => {
         vacanciesApi.list()
-            .then((res) => setVacancies(res.data.vacancies))
+            .then(function(res) {
+                setVacancies(res.data.vacancies)
+                setStatusCounter(res.data.counters)
+            })
             .catch(() => setError(true))
             .finally(() => setLoading(false));
     }, []);
 
+    const filteredVacancies = useMemo(() => {
+        const query = search.trim().toLowerCase();
+
+        return vacancies.filter((v) => {
+            const matchesSearch =
+                !query || v.role_title.toLowerCase().includes(query);
+
+            const matchesStatus =
+                statusFilter === "all" || v.status === statusFilter;
+
+            return matchesSearch && matchesStatus;
+        });
+    }, [vacancies, search, statusFilter]);
+
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <h1 className="text-xl font-semibold">Vacancies</h1>
+                <div className="flex flex-col gap-y-2">
+                    <h1 className="text-xl font-semibold">Vacancies</h1>
+                    <div className="flex flex-row gap-x-2 text-xs ">
+                        <span className="bg-blue-100 text-blue-700 rounded-full px-2.5 py-0.5">Running: {statusCounter.running}</span>
+                        <span className="bg-yellow-100 text-yellow-700 rounded-full px-2.5 py-0.5">Draft: {statusCounter.draft}</span>
+                        <span className="bg-green-100 text-green-700 rounded-full px-2.5 py-0.5">Completed: {statusCounter.completed}</span>
+                    </div>
+                </div>
+
                 <Button onClick={() => navigate("/vacancies/new")}>
                     <Plus className="h-4 w-4 mr-1.5"/> New Vacancy
                 </Button>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2">
+                <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+                    <Input
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Search vacancies..."
+                        className="pl-9"
+                    />
+                </div>
+
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-full sm:w-[160px]">
+                        <SelectValue placeholder="Status"/>
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All statuses</SelectItem>
+                        <SelectItem value="running">Running</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="draft">Draft</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
 
             {error && (
@@ -39,16 +99,27 @@ export default function VacancyListPage() {
                 <div className="space-y-2">
                     {[1, 2].map((i) => <Skeleton key={i} className="h-14 w-full"/>)}
                 </div>
-            ) : vacancies.length === 0 ? (
+            ) : filteredVacancies.length === 0 ? (
                 <div className="border rounded-lg p-12 text-center text-sm text-muted-foreground">
-                    <p className="mb-3">No vacancies yet.</p>
-                    <Button variant="outline" onClick={() => navigate("/vacancies/new")}>
-                        <Plus className="h-4 w-4 mr-1.5"/> Create your first vacancy
-                    </Button>
+                    <p className="mb-3">
+                        {search || statusFilter !== "all"
+                            ? "No vacancies match your filters."
+                            : "No vacancies yet."}
+                    </p>
+
+                    {!search && statusFilter === "all" && (
+                        <Button
+                            variant="outline"
+                            onClick={() => navigate("/vacancies/new")}
+                        >
+                            <Plus className="h-4 w-4 mr-1.5"/>
+                            Create your first vacancy
+                        </Button>
+                    )}
                 </div>
             ) : (
                 <div className="space-y-2">
-                    {vacancies.map((v) => (
+                    {filteredVacancies.map((v) => (
                         <Card
                             key={v.id}
                             className="cursor-pointer hover:border-primary/40 transition-colors"
@@ -58,6 +129,7 @@ export default function VacancyListPage() {
                                 <div className="flex items-center gap-2">
                                     <Briefcase className="h-4 w-4 text-muted-foreground"/>
                                     <span className="font-medium text-sm">{v.role_title}</span>
+
                                     <span
                                         className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                                             v.status === "running"
@@ -67,8 +139,8 @@ export default function VacancyListPage() {
                                                     : "bg-blue-100 text-green-700"
                                         }`}
                                     >
-                  {v.status}
-                </span>
+                                        {v.status}
+                                    </span>
                                 </div>
 
                                 <ChevronRight className="h-4 w-4 text-muted-foreground"/>
