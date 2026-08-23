@@ -147,8 +147,8 @@ class CoverageWebSocketMiddleware
     def coverage_json(map)
         {
             id: map.id,
-            skill_id: map.skill_id,
-            skill_label: map.skill_label,
+            skill_id: map.skill_taxonomy.skill_id,
+            skill_label: map.skill_taxonomy.skill_label,
             is_discovered: map.is_discovered,
             state: map.state,
             probe_count: map.probe_count,

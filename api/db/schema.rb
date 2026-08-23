@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_08_22_160736) do
+ActiveRecord::Schema[7.0].define(version: 2026_08_23_024331) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -72,16 +72,15 @@ ActiveRecord::Schema[7.0].define(version: 2026_08_22_160736) do
 
   create_table "coverage_maps", force: :cascade do |t|
     t.bigint "session_id", null: false
-    t.string "skill_id", limit: 50
-    t.string "skill_label", limit: 255, null: false
     t.boolean "is_discovered", default: false, null: false
     t.enum "state", default: "not_yet", null: false, enum_type: "coverage_state"
     t.integer "probe_count", default: 0, null: false
     t.text "last_signal"
     t.datetime "updated_at", default: -> { "now()" }
-    t.index ["session_id", "skill_label"], name: "index_coverage_maps_on_session_id_and_skill_label", unique: true
+    t.bigint "skill_taxonomy_id"
     t.index ["session_id"], name: "idx_coverage_session"
     t.index ["session_id"], name: "index_coverage_maps_on_session_id"
+    t.index ["skill_taxonomy_id"], name: "index_coverage_maps_on_skill_taxonomy_id"
   end
 
   create_table "fit_gap_reports", force: :cascade do |t|

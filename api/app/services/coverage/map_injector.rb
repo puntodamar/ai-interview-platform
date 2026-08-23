@@ -61,8 +61,8 @@ module Coverage
 
         def skill_json(map)
             {
-                id: map.skill_id || map.skill_label.downcase.gsub(/\s+/, '-'),
-                label: map.skill_label,
+                id: map.skill_taxonomy.skill_id || map.skill_taxonomy.skill_label.downcase.gsub(/\s+/, '-'),
+                label: map.skill_taxonomy.skill_label,
                 state: map.state,
                 probe_count: map.probe_count
             }
@@ -114,7 +114,7 @@ module Coverage
 
             return nil unless best
 
-            best.skill_id || best.skill_label.downcase.gsub(/\s+/, '-')
+            best.skill_taxonomy.skill_id || best.skill_taxonomy.skill_label.downcase.gsub(/\s+/, '-')
         end
     end
 end

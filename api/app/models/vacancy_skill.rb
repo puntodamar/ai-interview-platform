@@ -6,6 +6,8 @@ class VacancySkill < ApplicationRecord
 
     validates :expected_level, numericality: { only_integer: true, in: 1..5 }
 
+    default_scope { includes(:skill_taxonomy) }
+
     CACHE_VERSION_KEY = 'vacancy-skill:index:version'
 
     def self.cache_version

@@ -6,7 +6,7 @@ module Api
             authorize_auth_token! :assessor, except: %i[candidate_info audio_complete]
             skip_before_action :require_tenant!, only: %i[candidate_info audio_complete]
 
-            before_action :set_session, only: %i[show end_session coverage transcript]
+            before_action :set_session, only: %i[show reset end_session coverage transcript]
 
             # GET /api/v1/assessments/:assessment_id/sessions
             def index
@@ -54,6 +54,25 @@ module Api
                         }
                     )
                 )
+            end
+
+            def reset
+                if @session.status != Session::STATUS_ENDED && @session.end_reason != Session::END_REASON_ERROR
+                    json_error('Invalid session state', :unprocessable_entity)
+                elsif @session.update(
+                    status: Session::STATUS_PENDING,
+                    ended_at: nil,
+                    duration_seconds: nil,
+                    gemini_resumption_token: nil,
+                    end_reason: nil
+                )
+                    json_response(session: @session)
+                else
+                    json_error(
+                        @session.errors.full_messages.join(', '),
+                        :unprocessable_entity
+                    )
+                end
             end
 
             # POST /api/v1/sessions/:id/end
@@ -152,6 +171,7 @@ module Api
             private
 
             def set_session
+
                 @session = Session.find(params[:id])
             rescue ActiveRecord::RecordNotFound
                 json_error('Session not found', :not_found)

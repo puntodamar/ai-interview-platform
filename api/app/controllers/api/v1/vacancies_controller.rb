@@ -101,7 +101,7 @@ module Api
                 vacancy.created_by = current_user.id
 
                 if vacancy.save
-                    if ENV['APP_DEBUG'].eql?('true')
+                    if Rails.env.development?
                         json_response(
                             {
                                 vacancy: ::Api::V1::VacancySerializer.detail_with_skills(vacancy)

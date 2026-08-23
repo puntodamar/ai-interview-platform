@@ -39,8 +39,7 @@ module Sessions
 
             skills.each do |skill|
                 @session.coverage_maps.create!(
-                    skill_id: skill.skill_id,
-                    skill_label: skill.skill_label,
+                    skill_taxonomy_id: skill.skill_taxonomy_id,
                     is_discovered: false,
                     state: 'not_yet',
                     probe_count: 0
