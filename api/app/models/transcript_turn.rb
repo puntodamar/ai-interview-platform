@@ -7,6 +7,7 @@ class TranscriptTurn < ApplicationRecord
 
     validates :turn_number, presence: true,
                             numericality: { only_integer: true, greater_than: 0 }
+
     validates :speaker, inclusion: { in: SPEAKERS }
     validates :text, presence: true
 

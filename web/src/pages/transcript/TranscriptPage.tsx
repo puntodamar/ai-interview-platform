@@ -86,26 +86,36 @@ export default function TranscriptPage() {
             )}
 
             {!loading && !error && turns.length > 0 && (
-                <div className="space-y-3">
+                <div className="space-y-4">
                     {turns.map((turn) => {
                         const isAI = turn.speaker === "ai";
+
                         return (
                             <div
                                 key={turn.id}
-                                className={`rounded-lg p-4 ${
-                                    isAI
-                                        ? "bg-muted border"
-                                        : "bg-background border border-primary/20"
-                                }`}
+                                className={`flex ${isAI ? "justify-start" : "justify-end"}`}
                             >
-                                <p
-                                    className={`text-xs font-semibold mb-1 ${
-                                        isAI ? "text-muted-foreground" : "text-primary"
+                                <div
+                                    className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                                        isAI
+                                            ? "bg-muted rounded-tl-sm"
+                                            : "bg-primary text-primary-foreground rounded-tr-sm"
                                     }`}
                                 >
-                                    {isAI ? "AI Interviewer" : "Candidate"}
-                                </p>
-                                <p className="text-sm whitespace-pre-wrap">{turn.text}</p>
+                                    <p
+                                        className={`text-xs font-semibold mb-1.5 ${
+                                            isAI
+                                                ? "text-muted-foreground"
+                                                : "text-primary-foreground/70"
+                                        }`}
+                                    >
+                                        {isAI ? "AI Interviewer" : "Candidate"}
+                                    </p>
+
+                                    <p className="text-sm whitespace-pre-wrap">
+                                        {turn.text}
+                                    </p>
+                                </div>
                             </div>
                         );
                     })}
