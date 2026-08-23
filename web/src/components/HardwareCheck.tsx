@@ -48,16 +48,39 @@ const HardwareCheck: React.FC<HardwareCheckProps> = ({onStart}) => {
     const [audioLevel, setAudioLevel] = useState<number>(0);
     const videoRef = useRef<HTMLVideoElement>(null);
 
+    const runOsAndBrowserCheck = () => {
+        setProgress((p) => ({
+            ...p,
+            osAndBrowser: ProctoringState.LOADING,
+        }));
+
+        setTimeout(() => {
+            getBrowserInfo();
+            getOSInfo();
+            getCurrentTime();
+
+            setProgress((p) => ({
+                ...p,
+                osAndBrowser: ProctoringState.PASSED,
+                internet: ProctoringState.LOADING,
+            }));
+        }, 800);
+    };
+
+    // useEffect(() => {
+    //     const {osAndBrowser, internet, camera, audio, microphone} = progress;
+    //     setAllPassed(
+    //         osAndBrowser === ProctoringState.PASSED &&
+    //         internet === ProctoringState.PASSED &&
+    //         camera === ProctoringState.PASSED &&
+    //         audio === ProctoringState.PASSED &&
+    //         microphone === ProctoringState.PASSED
+    //     );
+    // }, [progress]);
+
     useEffect(() => {
-        const {osAndBrowser, internet, camera, audio, microphone} = progress;
-        setAllPassed(
-            osAndBrowser === ProctoringState.PASSED &&
-            internet === ProctoringState.PASSED &&
-            camera === ProctoringState.PASSED &&
-            audio === ProctoringState.PASSED &&
-            microphone === ProctoringState.PASSED
-        );
-    }, [progress]);
+        runOsAndBrowserCheck();
+    }, []);
 
     useEffect(() => {
         if (videoRef.current && videoStream) videoRef.current.srcObject = videoStream;
@@ -205,13 +228,17 @@ const HardwareCheck: React.FC<HardwareCheckProps> = ({onStart}) => {
         videoStream?.getTracks().forEach((t) => t.stop());
         setVideoStream(null);
         setInternetResult(null);
+        setAudioLevel(0);
+
         setProgress({
-            osAndBrowser: ProctoringState.LOADING,
+            osAndBrowser: ProctoringState.WAITING,
             internet: ProctoringState.WAITING,
             camera: ProctoringState.WAITING,
             audio: ProctoringState.WAITING,
             microphone: ProctoringState.WAITING,
         });
+
+        runOsAndBrowserCheck();
     };
 
     const thresholds = DEFAULT_THRESHOLDS;
