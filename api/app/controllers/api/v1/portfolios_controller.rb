@@ -22,6 +22,7 @@ module Api
                 end
 
                 cache_key = [
+                    Current.tenant_id,
                     Portfolio.model_name.cache_key,
                     'options',
                     Portfolio.cache_version

@@ -10,6 +10,7 @@ module Api
             # GET /api/v1/assessments
             def index
                 cache_key = [
+                    Current.tenant_id,
                     Assessment.model_name.cache_key,
                     'index',
                     params.to_unsafe_h.sort.to_h,
@@ -42,6 +43,7 @@ module Api
             # GET /api/v1/assessments/:id
             def show
                 cache_key = [
+                    Current.tenant_id,
                     Assessment.model_name.cache_key,
                     'show',
                     params[:id],
@@ -92,6 +94,7 @@ module Api
             def set_assessment
 
                 cache_key = [
+                    Current.tenant_id,
                     Assessment.model_name.cache_key,
                     params[:id],
                     Assessment.cache_version

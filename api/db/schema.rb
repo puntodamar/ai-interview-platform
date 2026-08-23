@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_08_23_042532) do
+ActiveRecord::Schema[7.0].define(version: 2026_08_23_201756) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -183,7 +183,9 @@ ActiveRecord::Schema[7.0].define(version: 2026_08_23_042532) do
     t.string "role", limit: 20, default: "user", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "organization_id", null: false
     t.index ["email"], name: "idx_ai_interview_users_email", unique: true
+    t.index ["organization_id"], name: "index_users_on_organization_id"
   end
 
   create_table "vacancies", force: :cascade do |t|
@@ -219,6 +221,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_08_23_042532) do
   add_foreign_key "portfolios", "sessions"
   add_foreign_key "sessions", "assessments"
   add_foreign_key "transcript_turns", "sessions"
+  add_foreign_key "users", "organizations"
   add_foreign_key "vacancy_skills", "skill_taxonomies"
   add_foreign_key "vacancy_skills", "vacancies"
 end

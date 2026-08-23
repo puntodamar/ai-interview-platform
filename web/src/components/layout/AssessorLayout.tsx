@@ -1,8 +1,7 @@
 import {Link, Outlet, useLocation, useNavigate} from "react-router-dom";
 import {useAtomValue, useSetAtom} from "jotai";
-import {tenantAtom} from "@/stores/tenantAtom";
+import {clearTenant, tenantAtom} from "@/stores/tenantAtom";
 import {authAtom, clearToken} from "@/stores/authAtom";
-import {Button} from "@/components/ui/button";
 import {Briefcase, ClipboardList, LayoutDashboard, LogOut} from "lucide-react";
 import {cn} from "@/lib/utils";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
@@ -20,6 +19,7 @@ export default function AssessorLayout() {
 
     const handleLogout = () => {
         clearToken();
+        clearTenant();
         setAuth({token: null});
         navigate("/login");
     };

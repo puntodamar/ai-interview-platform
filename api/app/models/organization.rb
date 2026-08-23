@@ -8,6 +8,8 @@
 class Organization < ApplicationRecord
     self.table_name = 'organizations'
 
+    has_many :users
+
     # Mirrors rakamin-api Organisation.identify exactly.
     # Accepts identifier, name, scheme, or host.
     def self.identify(identifier)

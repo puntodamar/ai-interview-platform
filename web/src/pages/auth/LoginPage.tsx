@@ -2,6 +2,7 @@ import {useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {useSetAtom} from "jotai";
 import {authAtom, saveToken} from "@/stores/authAtom";
+import {saveTenant, tenantAtom} from "@/stores/tenantAtom";
 import {authApi} from "@/services/auth";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
@@ -11,6 +12,7 @@ import {Loader2} from "lucide-react";
 export default function LoginPage() {
     const navigate = useNavigate();
     const setAuth = useSetAtom(authAtom);
+    const setTenant = useSetAtom(tenantAtom);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
@@ -23,8 +25,11 @@ export default function LoginPage() {
         try {
             const res = await authApi.login({email, password});
             const token = res.data.token;
+            const tenant = {id: null, name: res.data.tenant};
             saveToken(token);
+            saveTenant(tenant);
             setAuth({token});
+            setTenant(tenant);
             navigate("/assessments");
         } catch {
             setError("Invalid email or password.");

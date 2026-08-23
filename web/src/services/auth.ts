@@ -7,6 +7,7 @@ export interface LoginPayload {
 
 export interface LoginResponse {
     token: string;
+    tenant: string;
 }
 
 export const authApi = {

@@ -12,6 +12,7 @@ module Api
                 full = params[:full].present?
 
                 cache_key = [
+                    Current.tenant_id,
                     SkillTaxonomy.model_name.cache_key,
                     'index',
                     params.to_unsafe_h.sort.to_h,
@@ -37,6 +38,7 @@ module Api
             # GET /api/v1/skill_taxonomies/:skill_id
             def show
                 cache_key = [
+                    Current.tenant_id,
                     SkillTaxonomy.model_name.cache_key,
                     'show',
                     params[:skill_id],
@@ -57,6 +59,7 @@ module Api
 
             def set_skill
                 cache_key = [
+                    Current.tenant_id,
                     SkillTaxonomy.model_name.cache_key,
                     params[:id],
                     SkillTaxonomy.cache_version

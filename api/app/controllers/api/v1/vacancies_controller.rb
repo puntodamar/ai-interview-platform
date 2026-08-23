@@ -10,6 +10,7 @@ module Api
             # GET /api/v1/vacancies
             def index
                 cache_key = [
+                    Current.tenant_id,
                     Vacancy.model_name.cache_key,
                     'index',
                     params.to_unsafe_h.sort.to_h,
@@ -60,6 +61,7 @@ module Api
             # GET /api/v1/vacancies/options
             def options
                 cache_key = [
+                    Current.tenant_id,
                     Vacancy.model_name.cache_key,
                     'options',
                     Vacancy.cache_version
@@ -85,6 +87,7 @@ module Api
             # GET /api/v1/vacancies/:id
             def show
                 cache_key = [
+                    Current.tenant_id,
                     Vacancy.model_name.cache_key,
                     'show',
                     params[:id],
@@ -149,6 +152,7 @@ module Api
 
             def set_vacancy
                 cache_key = [
+                    Current.tenant_id,
                     Vacancy.model_name.cache_key,
                     params[:id],
                     Vacancy.cache_version

@@ -109,6 +109,7 @@ module Api
             # GET /api/v1/sessions/:id/transcript
             def transcript
                 cache_key = [
+                    Current.tenant_id,
                     TranscriptTurn.model_name.cache_key,
                     "transcript-#{@session.id}",
                     TranscriptTurn.cache_version
