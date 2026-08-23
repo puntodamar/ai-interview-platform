@@ -23,7 +23,37 @@ module Portfolios
             portfolio.update!(generation_status: 'generating')
 
             prompt = build_prompt
-            response = @gemini_client.generate_content(prompt, temperature: 0.2)
+            # response =  @gemini_client.generate_content(prompt, temperature: 0.2)
+
+            response = {
+                'configured_skills' => [
+                    {
+                        'skill_id' => 'SK-ENG-001',
+                        'skill_label' => 'React / Frontend Development Core',
+                        'level' => 3,
+                        'confidence' => 'high',
+                        'evidence' => [
+                            'I usually break the application into reusable components and keep the state as close as possible to where it is used.',
+                            'For more complex forms, I prefer separating validation and form state from the presentation components.',
+                            'When performance becomes an issue, I profile the component tree before introducing memoization.'
+                        ],
+                        'competency_summary' => 'Demonstrates solid independent experience with React and frontend architecture. Can handle moderately complex problems and makes reasonable tradeoffs around component structure, state management, and performance.'
+                    },
+                    {
+                        'skill_id' => 'SK-ENG-002',
+                        'skill_label' => 'Node.js / Backend Development',
+                        'level' => 3,
+                        'confidence' => 'high',
+                        'evidence' => [
+                            'I normally keep business logic inside service objects or domain models instead of putting too much logic in controllers.',
+                            'For database performance problems, I first inspect the generated query and execution plan.',
+                            'I prefer background jobs for operations that do not need to block the request.'
+                        ],
+                        'competency_summary' => 'Shows strong practical backend development ability with good separation of concerns and awareness of database and asynchronous processing tradeoffs. Capable of independently solving complex but familiar backend problems.'
+                    }
+                ],
+                'discovered_skills' => []
+            }
 
             save_skills(portfolio, response)
             portfolio.update!(generation_status: 'complete', generated_at: Time.current)
@@ -103,7 +133,7 @@ module Portfolios
                 {
                   "configured_skills": [
                     {
-                      "skill_id": "sk-eng-001",
+                      "skill_id": "SK-ENG-001",
                       "skill_label": "React / Frontend Development",
                       "level": 3,
                       "confidence": "high",
