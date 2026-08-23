@@ -153,38 +153,38 @@ export default function AssessmentEditPage() {
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 {/* Vacancy */}
-                <div className="space-y-1.5">
-                    <Label>
-                        Vacancy <span className="text-destructive">*</span>
-                    </Label>
+                {/*<div className="space-y-1.5">*/}
+                {/*    <Label>*/}
+                {/*        Vacancy <span className="text-destructive">*</span>*/}
+                {/*    </Label>*/}
 
-                    <Select
-                        value={
-                            form.watch("vacancy_id")
-                                ? String(form.watch("vacancy_id"))
-                                : undefined
-                        }
-                        onValueChange={(v) =>
-                            setValue("vacancy_id", Number(v))
-                        }
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select vacancy"/>
-                        </SelectTrigger>
+                {/*    <Select*/}
+                {/*        value={*/}
+                {/*            form.watch("vacancy_id")*/}
+                {/*                ? String(form.watch("vacancy_id"))*/}
+                {/*                : undefined*/}
+                {/*        }*/}
+                {/*        onValueChange={(v) =>*/}
+                {/*            setValue("vacancy_id", Number(v))*/}
+                {/*        }*/}
+                {/*    >*/}
+                {/*        <SelectTrigger>*/}
+                {/*            <SelectValue placeholder="Select vacancy"/>*/}
+                {/*        </SelectTrigger>*/}
 
-                        <SelectContent className="max-w-[calc(100vw-2rem)]">
-                            {vacancies.map((vacancy) => (
-                                <SelectItem
-                                    key={vacancy.id}
-                                    value={String(vacancy.id)}
-                                    className="whitespace-normal"
-                                >
-                                    {vacancy.role_title}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
+                {/*        <SelectContent className="max-w-[calc(100vw-2rem)]">*/}
+                {/*            {vacancies.map((vacancy) => (*/}
+                {/*                <SelectItem*/}
+                {/*                    key={vacancy.id}*/}
+                {/*                    value={String(vacancy.id)}*/}
+                {/*                    className="whitespace-normal"*/}
+                {/*                >*/}
+                {/*                    {vacancy.role_title}*/}
+                {/*                </SelectItem>*/}
+                {/*            ))}*/}
+                {/*        </SelectContent>*/}
+                {/*    </Select>*/}
+                {/*</div>*/}
 
                 {/* Time limit */}
                 <div className="space-y-1.5">
