@@ -14,153 +14,20 @@ import {
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {assessmentsApi} from "@/services/assessments";
+import {sessionsApi} from "@/services/sessions.ts";
 import {LEVEL_LABELS} from "@/utils/constants";
 import {
     ArrowLeft,
     Check,
     Clock,
     Copy,
-    Eye,
     Pencil,
     Plus,
     UserRound,
 } from "lucide-react";
 import type {Assessment, Session} from "@/types";
 import NotFound from "@/components/NotFound.tsx";
-
-function SessionRow({
-                        session,
-                        index,
-                        assessmentId,
-                        onCopy,
-                        copiedId,
-                    }: {
-    session: Session;
-    index: number;
-    assessmentId: string;
-    onCopy: (id: number) => void;
-    copiedId: number | null;
-}) {
-    const navigate = useNavigate();
-
-    const isLive = session.status === "active";
-    const isEnded = session.status === "ended";
-    const isPending = session.status === "pending";
-
-    const displayName =
-        session.candidate_name || `Candidate ${index}`;
-
-    return (
-        <div className="flex items-center justify-between py-3 px-4">
-            <div className="flex items-center gap-3">
-                <div
-                    className="flex items-center justify-center w-7 h-7 rounded-full bg-muted text-xs font-medium text-muted-foreground"
-                >
-                    {index}
-                </div>
-
-                <div className="space-y-0.5">
-                    <div className="text-sm font-medium">
-                        {displayName}
-                    </div>
-
-                    {session.started_at && (
-                        <div className="text-xs text-muted-foreground">
-                            {new Date(
-                                session.started_at
-                            ).toLocaleDateString()}
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-                {isPending && (
-                    <span className="flex items-center gap-1 text-xs text-amber-600">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400"/>
-                        Awaiting candidate
-                    </span>
-                )}
-
-                {isLive && (
-                    <span className="flex items-center gap-1 text-xs text-primary">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"/>
-                        Live
-                    </span>
-                )}
-
-                {isEnded && session.end_reason === "error" && (
-                    <span className="flex items-center gap-1 text-xs text-destructive">
-                        <span className="w-1.5 h-1.5 rounded-full bg-destructive"/>
-                        Failed
-                    </span>
-                )}
-
-                {isEnded && session.end_reason !== "error" && (
-                    <span className="flex items-center gap-1 text-xs text-green-600">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-500"/>
-                        Completed
-                    </span>
-                )}
-
-                <div className="flex items-center gap-1.5">
-                    {isPending && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-xs"
-                            onClick={() => onCopy(session.id)}
-                        >
-                            {copiedId === session.id ? (
-                                <>
-                                    <Check className="h-3 w-3 mr-1"/>
-                                    Copied
-                                </>
-                            ) : (
-                                <>
-                                    <Copy className="h-3 w-3 mr-1"/>
-                                    Copy link
-                                </>
-                            )}
-                        </Button>
-                    )}
-
-                    {isLive && (
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-7 px-2 text-xs"
-                            onClick={() =>
-                                navigate(
-                                    `/assessments/${assessmentId}/sessions/${session.id}/monitor`
-                                )
-                            }
-                        >
-                            <Eye className="h-3 w-3 mr-1"/>
-                            Monitor
-                        </Button>
-                    )}
-
-                    {isEnded &&
-                        session.end_reason !== "error" && (
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-7 px-2 text-xs"
-                                onClick={() =>
-                                    navigate(
-                                        `/assessments/${assessmentId}/sessions/${session.id}/portfolio`
-                                    )
-                                }
-                            >
-                                Results
-                            </Button>
-                        )}
-                </div>
-            </div>
-        </div>
-    );
-}
+import SessionRow from "@/components/assessment/SessionRow.tsx";
 
 export default function AssessmentInvitePage() {
     const {id} = useParams<{ id: string }>();
@@ -251,6 +118,7 @@ export default function AssessmentInvitePage() {
             const created = res.data.session;
 
             setNewSession(created);
+
             setSessions((prev) => [
                 created,
                 ...prev,
@@ -260,15 +128,43 @@ export default function AssessmentInvitePage() {
         }
     };
 
+    const handleResetSession = async (sessionId: number) => {
+        try {
+            await sessionsApi.resetSession(
+                Number(id),
+                sessionId
+            );
+
+            setSessions((prev) =>
+                prev.map((session) =>
+                    session.id === sessionId
+                        ? {
+                            ...session,
+                            status: "pending",
+                            end_reason: undefined,
+                            ended_at: undefined,
+                            duration_seconds: undefined,
+                        }
+                        : session
+                )
+            );
+        } catch (error) {
+            console.error(
+                "Failed to reset session:",
+                error
+            );
+        }
+    };
+
     const copyLink = (
         session: Session,
-        id: number
+        sessionId: number
     ) => {
         navigator.clipboard.writeText(
             session.invite_url
         );
 
-        setCopiedId(id);
+        setCopiedId(sessionId);
 
         setTimeout(
             () => setCopiedId(null),
@@ -324,7 +220,15 @@ export default function AssessmentInvitePage() {
 
                     <div>
                         <h1 className="text-lg font-semibold">
-                            {assessment?.name ?? "—"}
+                            {assessment.name ?? "—"}
+                        </h1>
+
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
+                            <Clock className="h-3 w-3"/>
+
+                            {assessment.time_limit_min} min ·{" "}
+                            {assessment.skills?.length ?? 0} skills
+
                             <span
                                 className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                                     assessment.vacancy_status === "running"
@@ -334,21 +238,14 @@ export default function AssessmentInvitePage() {
                                             : "bg-blue-100 text-green-700"
                                 }`}
                             >
-                                      {assessment.vacancy_status}
-                                    </span>
-                        </h1>
-
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
-                            <Clock className="h-3 w-3"/>
-                            {assessment?.time_limit_min} min ·{" "}
-                            {assessment?.skills?.length ?? 0} skills
+                                {assessment.vacancy_status}
+                            </span>
                         </div>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-2">
                     {assessment.vacancy_status !== "completed" && (
-
                         <Button
                             variant="outline"
                             size="sm"
@@ -361,7 +258,6 @@ export default function AssessmentInvitePage() {
                             <Pencil className="h-3.5 w-3.5 mr-1.5"/>
                             Edit
                         </Button>
-
                     )}
 
                     {assessment.vacancy_status === "running" && (
@@ -371,6 +267,7 @@ export default function AssessmentInvitePage() {
                             disabled={creatingSession}
                         >
                             <Plus className="h-3.5 w-3.5 mr-1.5"/>
+
                             {creatingSession
                                 ? "Creating..."
                                 : "Invite Candidate"}
@@ -379,7 +276,7 @@ export default function AssessmentInvitePage() {
                 </div>
             </div>
 
-            {/* Invite dialog only when vacancy is NOT completed */}
+            {/* Invite dialog */}
             {assessment.vacancy_status === "running" && (
                 <>
                     <Dialog
@@ -497,7 +394,7 @@ export default function AssessmentInvitePage() {
 
             <Separator/>
 
-            {/* Sessions list */}
+            {/* Sessions */}
             <div className="space-y-2">
                 <div className="flex items-center justify-between">
                     <h2 className="text-sm font-semibold">
@@ -533,24 +430,20 @@ export default function AssessmentInvitePage() {
                         <CardContent className="p-0 divide-y">
                             {sessions.map((session, i) => (
                                 <SessionRow
+                                    assessment={assessment}
                                     key={session.id}
                                     session={session}
                                     index={sessions.length - i}
-                                    assessmentId={id!}
                                     onCopy={(sid) => {
-                                        const s =
-                                            sessions.find(
-                                                (x) =>
-                                                    x.id === sid
-                                            );
+                                        const s = sessions.find(
+                                            (x) => x.id === sid
+                                        );
 
                                         if (s) {
-                                            copyLink(
-                                                s,
-                                                sid
-                                            );
+                                            copyLink(s, sid);
                                         }
                                     }}
+                                    onReset={handleResetSession}
                                     copiedId={copiedId}
                                 />
                             ))}
@@ -559,8 +452,8 @@ export default function AssessmentInvitePage() {
                 )}
             </div>
 
-            {/* Assessment skills detail */}
-            {assessment?.skills &&
+            {/* Assessment skills */}
+            {assessment.skills &&
                 assessment.skills.length > 0 && (
                     <>
                         <Separator/>

@@ -4,7 +4,24 @@ class Session < ApplicationRecord
     include TenantScoped
 
     STATUSES = %w[pending active ended failed].freeze
-    END_REASONS = %w[manual_candidate manual_assessor all_covered time_ceiling error].freeze
+    END_REASONS = %w[
+      manual_candidate
+      manual_assessor
+      all_covered
+      time_ceiling
+      error
+    ].freeze
+
+    STATUS_PENDING = 'pending'
+    STATUS_ACTIVE = 'active'
+    STATUS_ENDED = 'ended'
+    STATUS_FAILED = 'failed'
+
+    END_REASON_MANUAL_CANDIDATE = 'manual_candidate'
+    END_REASON_MANUAL_ASSESSOR = 'manual_assessor'
+    END_REASON_ALL_COVERED = 'all_covered'
+    END_REASON_TIME_CEILING = 'time_ceiling'
+    END_REASON_ERROR = 'error'
 
     belongs_to :assessment
     has_many :transcript_turns, dependent: :destroy

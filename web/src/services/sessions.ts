@@ -12,6 +12,9 @@ export const sessionsApi = {
             session: {reason},
         }),
 
+    resetSession: (assessment_id: number, id: number) =>
+        api.post<{ session: Session }>(`/assessments/${assessment_id}/sessions/${id}/reset`),
+
     getCoverage: (id: number) =>
         api.get<CoverageMap>(`/sessions/${id}/coverage`),
 

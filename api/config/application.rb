@@ -9,6 +9,7 @@ require 'action_controller/railtie'
 
 require_relative '../app/middlewares/application_middleware'
 require_relative '../app/middlewares/tenant_resolver_middleware'
+require_relative '../app/channels/audio_websocket_middleware'
 
 Bundler.require(*Rails.groups)
 
@@ -48,5 +49,6 @@ module AiInterview
 
         config.middleware.use Rack::Attack
         config.middleware.use TenantResolverMiddleware
+        config.middleware.use AudioWebSocketMiddleware
     end
 end

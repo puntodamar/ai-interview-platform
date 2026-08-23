@@ -18,7 +18,11 @@ Rails.application.routes.draw do
 
             # Assessments
             resources :assessments do
-                resources :sessions, only: %i[index create]
+                resources :sessions, only: %i[index create] do
+                    member do
+                        post :reset
+                    end
+                end
             end
 
             # Sessions
