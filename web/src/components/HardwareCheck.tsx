@@ -73,7 +73,7 @@ const HardwareCheck: React.FC<HardwareCheckProps> = ({onStart}) => {
         try {
             const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
             const ctx = new AudioCtx();
-            if (ctx.state === "suspended") await ctx.resume();
+            if (ctx.state === "suspended") await withTimeout(ctx.resume(), 5_000);;
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.connect(gain);
