@@ -12,8 +12,8 @@ module Api
                 existing = @portfolio_skill.assessor_override
 
                 if existing
-                    if existing.update(override_params.merge(overridden_by: current_user.id,
-                                                             overridden_at: Time.current))
+                    if existing.update(override_params.merge(overridden_by: current_user.id, overridden_at: Time.current))
+                        Portfolio.invalidate_cache
                         regenerate_stale_fitgap_reports
                         json_response(override: override_json(existing))
                     else
@@ -29,6 +29,7 @@ module Api
                     )
 
                     if new_override.save
+                        Portfolio.invalidate_cache
                         regenerate_stale_fitgap_reports
                         json_response({ override: override_json(new_override) }, :created)
                     else
