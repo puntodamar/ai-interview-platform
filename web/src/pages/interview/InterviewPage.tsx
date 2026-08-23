@@ -40,17 +40,35 @@ export default function InterviewPage() {
     const micMutedRef = useRef(false);
 
     // Fetch candidate info
+    const [candidateInfoError, setCandidateInfoError] = useState<string | null>(null);
+    const [candidateInfoLoading, setCandidateInfoLoading] = useState(true);
+
     useEffect(() => {
         if (!token) return;
+
+        setCandidateInfoLoading(true);
+        setCandidateInfoError(null);
+
         sessionsApi.getCandidateInfo(token)
             .then((res) => {
+                console.log(res)
                 setCandidateInfo(res.data);
                 setSessionId(res.data.session_id);
-                if (res.data.session_status === "ended") setInterviewState("complete");
-            })
-            .catch(() => setInterviewState("complete"));
-    }, [token]);
 
+                if (res.data.session_status === "ended") {
+                    setInterviewState(res.data.end_reason === "error" ? 'error' : 'complete');
+                }
+            })
+            .catch((error) => {
+                console.error("Failed to fetch candidate info:", error);
+                setCandidateInfoError(
+                    error?.response?.data?.message ?? "Failed to load interview."
+                );
+            })
+            .finally(() => {
+                setCandidateInfoLoading(false);
+            });
+    }, [token]);
     const muteRef = useRef<(() => void) | null>(null);
     const unmuteRef = useRef<(() => void) | null>(null);
 
@@ -187,6 +205,47 @@ export default function InterviewPage() {
                 ? "connected"
                 : "reconnecting";
 
+    if (candidateInfoLoading) {
+        return (
+            <div className="max-w-xl mx-auto px-4 py-8 space-y-6">
+                <div className="text-center space-y-2">
+                    <div className="h-6 w-48 bg-muted animate-pulse rounded mx-auto" />
+                    <div className="h-4 w-24 bg-muted animate-pulse rounded mx-auto" />
+                </div>
+
+                <div className="space-y-4">
+                    <div className="h-32 bg-muted/50 animate-pulse rounded-lg" />
+                    <div className="h-11 bg-muted animate-pulse rounded-md" />
+                </div>
+            </div>
+        );
+    }
+
+    if (candidateInfoError) {
+        return (
+            <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4">
+                <div className="text-4xl">⚠️</div>
+                <h2 className="text-xl font-semibold">Unable to Load Interview</h2>
+                <p className="text-sm text-muted-foreground">
+                    {candidateInfoError}
+                </p>
+            </div>
+        );
+    }
+
+
+    if(interviewState === "error") {
+        return (
+            <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4">
+                <div className="text-4xl">⚠️</div>
+                <h2 className="text-xl font-semibold">Interview Error</h2>
+                <p className="text-sm text-muted-foreground">
+                    An error occurred during the interview. Please contact the hiring team for assistance.
+                </p>
+            </div>
+        );
+    }
+    
     // ── State A: Pre-start ──────────────────────────────────────────────────
     if (interviewState === "idle") {
         return (

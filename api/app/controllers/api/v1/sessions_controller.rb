@@ -144,7 +144,8 @@ module Api
                     # role_title: assessment.name,
                     role_title: assessment.vacancy.role_title,
                     time_limit_min: assessment.time_limit_min,
-                    session_status: session.status
+                    session_status: session.status,
+                    end_reason: session.end_reason
                 )
             end
 
