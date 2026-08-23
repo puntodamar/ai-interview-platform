@@ -186,19 +186,19 @@ const HardwareCheck: React.FC<HardwareCheckProps> = ({onStart}) => {
     };
 
     // Step 1: OS & browser
-    useEffect(() => {
-        setProgress((p) => ({...p, osAndBrowser: ProctoringState.LOADING}));
-        setTimeout(() => {
-            getBrowserInfo();
-            getOSInfo();
-            getCurrentTime();
-            setProgress((p) => ({
-                ...p,
-                osAndBrowser: ProctoringState.PASSED,
-                internet: ProctoringState.LOADING,
-            }));
-        }, 800);
-    }, []);
+    // useEffect(() => {
+    //     setProgress((p) => ({...p, osAndBrowser: ProctoringState.LOADING}));
+    //     setTimeout(() => {
+    //         getBrowserInfo();
+    //         getOSInfo();
+    //         getCurrentTime();
+    //         setProgress((p) => ({
+    //             ...p,
+    //             osAndBrowser: ProctoringState.PASSED,
+    //             internet: ProctoringState.LOADING,
+    //         }));
+    //     }, 800);
+    // }, []);
 
     // Step 2: Internet
     useEffect(() => {

@@ -140,8 +140,8 @@ export async function testInternetSpeed(
         const uploadMbps = average(uploadTests) * 8;
         const ping = average(pingTests);
 
-        const passed = import.meta.env.BYPASS_INTERNET_CHECK === "true" || (downloadMbps >= thresholds.minDownloadMbps && uploadMbps >= thresholds.minUploadMbps && ping <= thresholds.maxPingMs);
-        
+        const passed = import.meta.env.VITE_BYPASS_INTERNET_CHECK === "true" || (downloadMbps >= thresholds.minDownloadMbps && uploadMbps >= thresholds.minUploadMbps && ping <= thresholds.maxPingMs);
+
         return {
             download: Math.round(downloadMbps * 100) / 100,
             upload: Math.round(uploadMbps * 100) / 100,
