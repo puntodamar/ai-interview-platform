@@ -4,6 +4,7 @@ class PortfolioSkill < ApplicationRecord
     CONFIDENCE_LEVELS = %w[high medium low].freeze
 
     belongs_to :portfolio
+    belongs_to :skill_taxonomy
     has_one :assessor_override, dependent: :destroy
 
     validates :skill_label, presence: true

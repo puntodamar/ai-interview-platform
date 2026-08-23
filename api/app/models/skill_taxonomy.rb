@@ -5,6 +5,7 @@ class SkillTaxonomy < ApplicationRecord
     has_many :assessment_skills
     has_many :vacancies, through: :vacancy_skills
     has_many :coverage_maps
+    has_many :portfolio_skills
 
     validates :skill_id, presence: true, uniqueness: true, length: { maximum: 50 }
     validates :skill_label, presence: true, length: { maximum: 255 }

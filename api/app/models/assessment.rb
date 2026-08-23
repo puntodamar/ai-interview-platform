@@ -33,6 +33,6 @@ class Assessment < ApplicationRecord
     end
 
     def name
-        vacancy.name
+        vacancy.role_title
     end
 end

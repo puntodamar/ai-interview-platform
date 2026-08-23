@@ -126,7 +126,7 @@ module Portfolios
 
         def skill_definition_block(skill)
             lines = ['━━━━━━━━━━━━━━━']
-            lines << "SKILL: #{skill.skill_label} (#{skill.skill_id || 'custom'})"
+            lines << "SKILL: #{skill.skill_taxonomy.skill_label} (#{skill.skill_taxonomy.skill_id || 'custom'})"
             lines << "SCOPE: #{skill.scope_include}" if skill.scope_include.present?
             lines << ''
             lines << "L1 — #{skill.l1_anchor}"
@@ -139,8 +139,8 @@ module Portfolios
 
         def coverage_json(map)
             {
-                id: map.skill_id || map.skill_label.downcase.gsub(/\s+/, '-'),
-                label: map.skill_label,
+                id: map.skill_taxonomy.skill_id || map.skill_taxonomy.skill_label.downcase.gsub(/\s+/, '-'),
+                label: map.skill_taxonomy.skill_label,
                 state: map.state,
                 probe_count: map.probe_count,
                 is_discovered: map.is_discovered
@@ -166,9 +166,10 @@ module Portfolios
             end
 
             (data['discovered_skills'] || []).each do |skill_data|
+
+                skill_taxonomy = SkillTaxonomy.find_by_skill_id(skill_data['skill_id']) || SkillTaxonomy.find_by_skill_label(skill_data['skill_label'])
                 portfolio.portfolio_skills.create!(
-                    skill_id: nil,
-                    skill_label: skill_data['skill_label'],
+                    skill_taxonomy_id: skill_taxonomy.id,
                     is_discovered: true,
                     ai_level: skill_data['level'].to_i.clamp(1, 5),
                     ai_confidence: skill_data['confidence'],
