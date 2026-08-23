@@ -23,11 +23,11 @@ class Portfolio < ApplicationRecord
 
     def self.invalidate_cache
         Rails.cache.write(CACHE_VERSION_KEY, SecureRandom.uuid)
-        Rails.cache.delete([cache_key, id])
     end
 
     def invalidate_cache
-        self.invalidate_cache
+        self.class.invalidate_cache
+        Rails.cache.delete([cache_key, id])
     end
 
     def complete? = generation_status == 'complete'
