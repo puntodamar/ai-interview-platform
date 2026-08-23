@@ -12,4 +12,17 @@ class TranscriptTurn < ApplicationRecord
     validates :text, presence: true
 
     scope :ordered, -> { order(:turn_number) }
+
+    after_commit :invalidate_cache
+
+    CACHE_VERSION_KEY = 'transcript:index:version'
+
+    def self.cache_version
+        Rails.cache.fetch(CACHE_VERSION_KEY) { SecureRandom.uuid }
+    end
+
+    def invalidate_cache
+        Rails.cache.write(CACHE_VERSION_KEY, SecureRandom.uuid)
+        Rails.cache.delete([cache_key, id])
+    end
 end

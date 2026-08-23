@@ -108,25 +108,35 @@ module Api
 
             # GET /api/v1/sessions/:id/transcript
             def transcript
-                from_turn = params[:from_turn].to_i
-                turns = @session.transcript_turns
-                                .ordered
-                                .then { from_turn.positive? ? _1.where('turn_number >= ?', from_turn) : _1 }
+                cache_key = [
+                    TranscriptTurn.model_name.cache_key,
+                    "transcript-#{@session.id}",
+                    TranscriptTurn.cache_version
+                ]
 
-                json_response(
-                    turns: turns.map do |t|
-                        {
-                            id: t.id,
-                            turn_number: t.turn_number,
-                            speaker: t.speaker,
-                            text: t.text,
-                            audio_start_ms: t.audio_start_ms,
-                            audio_end_ms: t.audio_end_ms,
-                            created_at: t.created_at
-                        }
-                    end,
-                    total: turns.count
-                )
+                result = Rails.cache.fetch(cache_key, expires_in: 1.hour) do
+                    from_turn = params[:from_turn].to_i
+                    turns = @session.transcript_turns
+                                    .ordered
+                                    .then { from_turn.positive? ? _1.where('turn_number >= ?', from_turn) : _1 }
+
+                    {
+                        turns: turns.map do |t|
+                            {
+                                id: t.id,
+                                turn_number: t.turn_number,
+                                speaker: t.speaker,
+                                text: t.text,
+                                audio_start_ms: t.audio_start_ms,
+                                audio_end_ms: t.audio_end_ms,
+                                created_at: t.created_at
+                            }
+                        end,
+                        total: turns.count
+                    }
+                end
+
+                json_response(result)
             end
 
             # POST /sessions/:token/audio_complete  — no JWT, invite token in URL
