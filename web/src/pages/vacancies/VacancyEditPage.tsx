@@ -370,6 +370,7 @@ export default function VacancyEditPage() {
                 open={pickerOpen}
                 onOpenChange={setPickerOpen}
                 onSelect={handleAddSkill}
+                selectedSkills={fields}
             />
         </div>
     );

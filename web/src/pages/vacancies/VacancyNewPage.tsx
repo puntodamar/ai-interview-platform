@@ -302,6 +302,7 @@ export default function VacancyNewPage() {
             <SkillPicker
                 open={pickerOpen}
                 onOpenChange={setPickerOpen}
+                selectedSkills={fields}
                 onSelect={function (skill) {
                     console.log(skill)
                     append({

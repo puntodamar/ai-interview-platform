@@ -337,6 +337,7 @@ export default function AssessmentEditPage() {
             <SkillPicker
                 open={pickerOpen}
                 onOpenChange={setPickerOpen}
+                selectedSkills={fields}
                 onSelect={(s) =>
                     append({
                         ...s,

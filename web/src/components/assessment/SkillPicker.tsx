@@ -14,17 +14,25 @@ interface SkillPickerProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSelect: (skill: Partial<AssessmentSkill>) => void;
+    selectedSkills?: Partial<AssessmentSkill>[];
 }
 
 export default function SkillPicker({
                                         open,
                                         onOpenChange,
                                         onSelect,
+                                        selectedSkills = [],
                                     }: SkillPickerProps) {
     const [skills, setSkills] = useState<SkillTaxonomy[]>([]);
     const [loading, setLoading] = useState(false);
     const [loaded, setLoaded] = useState(false);
     const [query, setQuery] = useState("");
+
+    const selectedSkillIds = new Set(
+        selectedSkills
+            .filter((skill) => !skill.is_custom)
+            .map((skill) => skill.skill_taxonomy_id ?? skill.skill_id)
+    );
 
     useEffect(() => {
         if (!open || loaded) {
@@ -49,11 +57,15 @@ export default function SkillPicker({
             });
     }, [open, loaded]);
 
-    const filtered = skills.filter((s) =>
-        s.skill_label
+    const filtered = skills.filter((s) => {
+        const matchesQuery = s.skill_label
             .toLowerCase()
-            .includes(query.toLowerCase())
-    );
+            .includes(query.toLowerCase());
+
+        const alreadySelected = selectedSkillIds.has(s.id);
+
+        return matchesQuery && !alreadySelected;
+    });
 
     const handleSelect = (s: SkillTaxonomy) => {
         onSelect({
@@ -131,7 +143,7 @@ export default function SkillPicker({
                     ) : (
                         filtered.map((s) => (
                             <button
-                                key={s.skill_id}
+                                key={s.id}
                                 type="button"
                                 onClick={() => handleSelect(s)}
                                 className="
