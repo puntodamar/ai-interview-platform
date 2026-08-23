@@ -172,11 +172,12 @@ export default function AssessmentEditPage() {
                             <SelectValue placeholder="Select vacancy"/>
                         </SelectTrigger>
 
-                        <SelectContent>
+                        <SelectContent className="max-w-[calc(100vw-2rem)]">
                             {vacancies.map((vacancy) => (
                                 <SelectItem
                                     key={vacancy.id}
                                     value={String(vacancy.id)}
+                                    className="whitespace-normal"
                                 >
                                     {vacancy.role_title}
                                 </SelectItem>

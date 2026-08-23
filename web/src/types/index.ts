@@ -1,6 +1,7 @@
 export interface Assessment {
     id: number;
     vacancy_id: number;
+    session_count: number;
     status: string,
     name: string;
     vacancy_status: string;

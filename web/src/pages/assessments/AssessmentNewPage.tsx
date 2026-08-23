@@ -226,13 +226,14 @@ export default function AssessmentNewPage() {
                             <SelectValue/>
                         </SelectTrigger>
 
-                        <SelectContent>
-                            {TIME_LIMIT_OPTIONS.map((min) => (
+                        <SelectContent className="max-w-[calc(100vw-2rem)]">
+                            {vacancies.map((vacancy) => (
                                 <SelectItem
-                                    key={min}
-                                    value={String(min)}
+                                    key={vacancy.id}
+                                    value={String(vacancy.id)}
+                                    className="whitespace-normal"
                                 >
-                                    {min} min
+                                    {vacancy.role_title}
                                 </SelectItem>
                             ))}
                         </SelectContent>

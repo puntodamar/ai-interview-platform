@@ -5,6 +5,7 @@ import {Skeleton} from "@/components/ui/skeleton";
 import {sessionsApi} from "@/services/sessions";
 import {ArrowLeft, Download} from "lucide-react";
 import type {TranscriptTurn} from "@/types";
+import TranscriptBubble from "@/components/interview/TranscriptBubble.tsx";
 
 export default function TranscriptPage() {
     const {id, sessionId} = useParams<{ id: string; sessionId: string }>();
@@ -28,14 +29,21 @@ export default function TranscriptPage() {
 
     const handleDownload = () => {
         const lines = turns.map((t) => {
-            const label = t.speaker === "ai" ? "AI" : "Candidate";
-            return `[${label}]\n${t.text}`;
+            const label = t.speaker === "ai" ? "AI Interviewer" : "Candidate";
+            const time = new Date(t.created_at).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+            });
+
+            return `[${label}] - ${time}\n${t.text}`;
         });
+
         const blob = new Blob([lines.join("\n\n")], {type: "text/plain"});
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `transcript-session-${sessionId}.txt`;
+        a.download = `transcript-session-${candidateName}.txt`;
         a.click();
         URL.revokeObjectURL(url);
     };
@@ -88,39 +96,19 @@ export default function TranscriptPage() {
             {!loading && !error && turns.length > 0 && (
                 <div className="space-y-4">
                     {turns.map((turn) => {
-                        const isAI = turn.speaker === "ai";
-
                         return (
-                            <div
+                            <TranscriptBubble
                                 key={turn.id}
-                                className={`flex ${isAI ? "justify-start" : "justify-end"}`}
-                            >
-                                <div
-                                    className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                                        isAI
-                                            ? "bg-muted rounded-tl-sm"
-                                            : "bg-primary text-primary-foreground rounded-tr-sm"
-                                    }`}
-                                >
-                                    <p
-                                        className={`text-xs font-semibold mb-1.5 ${
-                                            isAI
-                                                ? "text-muted-foreground"
-                                                : "text-primary-foreground/70"
-                                        }`}
-                                    >
-                                        {isAI ? "AI Interviewer" : "Candidate"}
-                                    </p>
-
-                                    <p className="text-sm whitespace-pre-wrap">
-                                        {turn.text}
-                                    </p>
-                                </div>
-                            </div>
+                                speaker={turn.speaker}
+                                text={turn.text}
+                                createdAt={turn.created_at}
+                                audioStartMs={turn.audio_start_ms}
+                            />
                         );
                     })}
                 </div>
             )}
+
         </div>
     );
 }
