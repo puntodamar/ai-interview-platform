@@ -4,7 +4,7 @@ import {Button} from "@/components/ui/button";
 import {Card, CardContent} from "@/components/ui/card";
 import {Skeleton} from "@/components/ui/skeleton";
 import {assessmentsApi} from "@/services/assessments";
-import {ChevronRight, Clock, Plus} from "lucide-react";
+import {ChevronRight, Clock, Plus, UsersRound} from "lucide-react";
 import type {Assessment} from "@/types";
 
 function SessionSummary({session}: { session?: Assessment["latest_session"] }) {
@@ -77,24 +77,35 @@ export default function AssessmentListPage() {
                             onClick={() => navigate(`/assessments/${a.id}/invite`)}
                         >
                             <CardContent className="py-3 px-4 flex items-center justify-between">
-                                <div>
-                                    <span className="font-medium text-sm">{a.name}</span>
-                                    <span
-                                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                            a.vacancy_status === "running"
-                                                ? "bg-blue-100 text-blue-700"
-                                                : a.vacancy_status === "draft"
-                                                    ? "bg-gray-100 text-gray-700"
-                                                    : "bg-blue-100 text-green-700"
-                                        }`}
-                                    >
-                                      {a.vacancy_status}
+                                <div className="flex flex-col gap-1">
+                                    <div className="flex flex-row items-center gap-x-2">
+                                        <span className="font-medium text-sm">{a.name}</span>
+                                        <span
+                                            className={`items-center rounded-full px-2.5 py-0.5 text-xs font-medium hidden md:inline-flex  ${
+                                                a.vacancy_status === "running"
+                                                    ? "bg-blue-100 text-blue-700"
+                                                    : a.vacancy_status === "draft"
+                                                        ? "bg-gray-100 text-gray-700"
+                                                        : "bg-blue-100 text-green-700"
+                                            }`}
+                                        >
+                                        {a.vacancy_status}
                                     </span>
-                                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                                    </div>
+
+                                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
                                         <span className="flex items-center gap-1">
                                             <Clock className="h-3 w-3"/>
-                                                {a.time_limit_min} min
+                                            {a.time_limit_min} min
                                         </span>
+
+                                        {a.session_count > 0 && (
+                                            <span className="flex items-center gap-1">
+                                                <UsersRound className="h-3 w-3"/>
+                                                {a.session_count} session{a.session_count > 1 ? "s" : ""}
+                                            </span>
+                                        )}
+
                                         {a.latest_session && (
                                             <>
                                                 <span>·</span>
@@ -102,8 +113,23 @@ export default function AssessmentListPage() {
                                             </>
                                         )}
                                     </div>
+
                                 </div>
-                                <ChevronRight className="h-4 w-4 text-muted-foreground"/>
+                                <div className="flex flex-row items-center justify-around gap-x-2 ">
+                                   <span
+                                       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium md:hidden ${
+                                           a.vacancy_status === "running"
+                                               ? "bg-blue-100 text-blue-700"
+                                               : a.vacancy_status === "draft"
+                                                   ? "bg-gray-100 text-gray-700"
+                                                   : "bg-blue-100 text-green-700"
+                                       }`}
+                                   >
+                                        {a.vacancy_status}
+                                    </span>
+                                    <ChevronRight className="h-4 w-4 text-muted-foreground"/>
+                                </div>
+
                             </CardContent>
                         </Card>
                     ))}

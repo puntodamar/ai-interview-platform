@@ -19,6 +19,7 @@ module Api
                           .merge(
                               name: assessment.vacancy&.role_title,
                               vacancy_status: assessment.vacancy&.status,
+                              session_count: assessment.sessions.count
                           )
             end
 
