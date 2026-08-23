@@ -31,6 +31,10 @@ class Session < ApplicationRecord
     validates :invite_token, presence: true, uniqueness: true
     validates :status, inclusion: { in: STATUSES }
     validates :end_reason, inclusion: { in: END_REASONS }, allow_nil: true
+    validates :candidate_name, presence: true, format: {
+        with: %r{\A[\p{L}\p{N}\s&/\-\.\+#'()]+\z},
+        message: 'contains invalid characters'
+    }
 
     before_validation :generate_invite_token, on: :create
 

@@ -10,7 +10,10 @@ class Vacancy < ApplicationRecord
 
     has_many :fit_gap_reports, dependent: :destroy
 
-    validates :role_title, presence: true
+    validates :role_title, presence: true, format: {
+                  with: /\A[\p{L}\p{N}\s&\/\-\.\+#'()]+\z/,
+                  message: 'contains invalid characters'
+              }
 
     accepts_nested_attributes_for :vacancy_skills,
                                   allow_destroy: true,
