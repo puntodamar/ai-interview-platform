@@ -74,7 +74,7 @@ export default function AssessmentListPage() {
             <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-y-2">
                     <h1 className="text-xl font-semibold">Assessments</h1>
-                    <div className="flex flex-row gap-x-2 text-xs ">
+                    <div className="hidden md:flex flex-row gap-x-2 text-xs ">
                         <span className="bg-blue-100 text-blue-700 rounded-full px-2.5 py-0.5">Running: {statusCounter.running}</span>
                         <span className="bg-yellow-100 text-yellow-700 rounded-full px-2.5 py-0.5">Draft: {statusCounter.draft}</span>
                         <span className="bg-green-100 text-green-700 rounded-full px-2.5 py-0.5">Completed: {statusCounter.completed}</span>

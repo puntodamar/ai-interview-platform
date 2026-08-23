@@ -27,14 +27,21 @@ export default function TranscriptPage() {
             .finally(() => setLoading(false));
     }, [sessionId]);
 
+    const formatAudioTime = (milliseconds: number) => {
+        const totalSeconds = Math.floor(milliseconds / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        const ms = milliseconds % 1000;
+
+        return `${minutes.toString().padStart(2, "0")}:${seconds
+            .toString()
+            .padStart(2, "0")}.${ms.toString().padStart(3, "0")}`;
+    };
+
     const handleDownload = () => {
         const lines = turns.map((t) => {
             const label = t.speaker === "ai" ? "AI Interviewer" : "Candidate";
-            const time = new Date(t.created_at).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-            });
+            const time = t.audio_start_ms !== undefined ? formatAudioTime(t.audio_start_ms) : "N/A";
 
             return `[${label}] - ${time}\n${t.text}`;
         });

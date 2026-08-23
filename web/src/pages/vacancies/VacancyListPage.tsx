@@ -53,7 +53,7 @@ export default function VacancyListPage() {
             <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-y-2">
                     <h1 className="text-xl font-semibold">Vacancies</h1>
-                    <div className="flex flex-row gap-x-2 text-xs ">
+                    <div className="flex-row gap-x-2 text-xs hidden md:flex">
                         <span className="bg-blue-100 text-blue-700 rounded-full px-2.5 py-0.5">Running: {statusCounter.running}</span>
                         <span className="bg-yellow-100 text-yellow-700 rounded-full px-2.5 py-0.5">Draft: {statusCounter.draft}</span>
                         <span className="bg-green-100 text-green-700 rounded-full px-2.5 py-0.5">Completed: {statusCounter.completed}</span>
@@ -126,12 +126,16 @@ export default function VacancyListPage() {
                             onClick={() => navigate(`/vacancies/${v.id}/edit`)}
                         >
                             <CardContent className="py-3 px-4 flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <Briefcase className="h-4 w-4 text-muted-foreground"/>
-                                    <span className="font-medium text-sm">{v.role_title}</span>
+                                <div className="flex items-center gap-2 min-w-0">
+                                    <Briefcase className="h-4 w-4 text-muted-foreground shrink-0"/>
 
+                                    <span className="font-medium text-sm truncate">
+                                        {v.role_title}
+                                    </span>
+
+                                    {/* Desktop status */}
                                     <span
-                                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                        className={`hidden md:inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                                             v.status === "running"
                                                 ? "bg-blue-100 text-blue-700"
                                                 : v.status === "draft"
@@ -143,7 +147,22 @@ export default function VacancyListPage() {
                                     </span>
                                 </div>
 
-                                <ChevronRight className="h-4 w-4 text-muted-foreground"/>
+                                {/* Mobile status + chevron */}
+                                <div className="flex flex-row items-center justify-around gap-x-2 shrink-0">
+                                    <span
+                                        className={`inline-flex md:hidden items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                            v.status === "running"
+                                                ? "bg-blue-100 text-blue-700"
+                                                : v.status === "draft"
+                                                    ? "bg-gray-100 text-gray-700"
+                                                    : "bg-blue-100 text-green-700"
+                                        }`}
+                                    >
+                                        {v.status}
+                                    </span>
+
+                                    <ChevronRight className="h-4 w-4 text-muted-foreground"/>
+                                </div>
                             </CardContent>
                         </Card>
                     ))}
