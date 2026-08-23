@@ -196,7 +196,7 @@ module Api
             def portfolio_skill_json(skill)
                 {
                     
-                    id: skill.skill_taxonomy_id,
+                    id: skill.id,
                     skill_id: skill.skill_taxonomy.skill_id,
                     skill_label: skill.skill_taxonomy.skill_label,
                     is_discovered: skill.is_discovered,
