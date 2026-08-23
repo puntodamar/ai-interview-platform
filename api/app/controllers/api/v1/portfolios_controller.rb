@@ -21,7 +21,19 @@ module Api
                     )
                 end
 
-                json_response(portfolio: portfolio_json(@portfolio))
+                cache_key = [
+                    Portfolio.model_name.cache_key,
+                    'options',
+                    Portfolio.cache_version
+                ]
+
+                result = Rails.cache.fetch(cache_key, expires_in: 1.hour) do
+                    {
+                        portfolio: portfolio_json(@portfolio)
+                    }
+                end
+
+                json_response(result)
             end
 
             # POST /api/v1/sessions/:id/portfolio/regenerate

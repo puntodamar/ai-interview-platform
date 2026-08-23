@@ -9,9 +9,22 @@ class Portfolio < ApplicationRecord
 
     validates :generation_status, inclusion: { in: GENERATION_STATUSES }
 
+    after_commit :invalidate_cache
+
     scope :complete, -> { where(generation_status: 'complete') }
     scope :failed, -> { where(generation_status: 'failed') }
     scope :generating, -> { where(generation_status: 'generating') }
+
+    CACHE_VERSION_KEY = 'portfolio:index:version'
+
+    def self.cache_version
+        Rails.cache.fetch(CACHE_VERSION_KEY) { SecureRandom.uuid }
+    end
+
+    def invalidate_cache
+        Rails.cache.write(CACHE_VERSION_KEY, SecureRandom.uuid)
+        Rails.cache.delete([cache_key, id])
+    end
 
     def complete? = generation_status == 'complete'
 
