@@ -37,7 +37,7 @@ module Api
                         :created
                     )
                 else
-                    json_error(session.errors.full_messages.first, :unprocessable_entity)
+                    json_error(session.errors.full_messages.join(', '), :unprocessable_entity)
                 end
             rescue ActiveRecord::RecordNotFound
                 json_error('Assessment not found', :not_found)
@@ -49,7 +49,7 @@ module Api
                     session: session_json(@session).merge(
                         assessment: {
                             id: @session.assessment.id,
-                            name: @session.assessment.name,
+                            name: @session.assessment.vacancy.role_title,
                             time_limit_min: @session.assessment.time_limit_min
                         }
                     )
@@ -141,7 +141,8 @@ module Api
 
                 json_response(
                     session_id: session.id,
-                    role_title: assessment.name,
+                    # role_title: assessment.name,
+                    role_title: assessment.vacancy.role_title,
                     time_limit_min: assessment.time_limit_min,
                     session_status: session.status
                 )

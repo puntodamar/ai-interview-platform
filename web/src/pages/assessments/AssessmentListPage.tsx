@@ -10,8 +10,6 @@ import type {Assessment} from "@/types";
 function SessionSummary({session}: { session?: Assessment["latest_session"] }) {
     if (!session) return null;
 
-    console.log(session)
-
     if (session.status === "active")
         return (
             <span className="flex items-center gap-1 text-xs text-primary">
