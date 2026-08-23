@@ -79,7 +79,7 @@ module Exports
             effective_level = override ? override.override_level : skill.ai_level
 
             pdf.font_size(11) do
-                pdf.text skill.skill_label.to_s, style: :bold
+                pdf.text skill.skill_taxonomy.skill_label.to_s, style: :bold
 
                 level_text = "Level: #{LEVEL_LABELS[effective_level]}"
                 if override
