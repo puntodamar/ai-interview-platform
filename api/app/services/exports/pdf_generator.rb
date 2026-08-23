@@ -37,6 +37,7 @@ module Exports
         private
 
         def render_header(pdf)
+            pdf.font_size(10) { pdf.text "#{Current.organization.name}", style: :bold}
             pdf.font_size(22) { pdf.text @assessment.name, style: :bold }
             pdf.move_down 4
             pdf.font_size(12) { pdf.text 'Skill Portfolio Report' }
@@ -44,8 +45,9 @@ module Exports
 
             pdf.font_size(10) do
                 pdf.text "Session: #{@session.id}"
+                pdf.text "Candidate: #{@session.candidate_name}"
                 pdf.text "Duration: #{format_duration(@session.duration_seconds)}"
-                pdf.text "Generated: #{Time.current.strftime('%Y-%m-%d %H:%M')}"
+                pdf.text "Generated: #{Time.current.in_time_zone("Asia/Jakarta").strftime('%d-%m-s%Y %H:%M')}"
             end
 
             pdf.stroke_horizontal_rule

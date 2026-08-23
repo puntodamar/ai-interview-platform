@@ -66,35 +66,46 @@ export default function PortfolioPage() {
 
     const handleExport = async (format: "pdf" | "json") => {
         if (!portfolio) return;
+
         setExporting(format);
+
         try {
             const res = await portfoliosApi.exportPortfolio(
                 portfolio.id,
                 format,
                 selectedVacancy ? Number(selectedVacancy) : undefined
             );
-            if (format === "json") {
-                const blob = new Blob([JSON.stringify(res.data, null, 2)], {type: "application/json"});
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `portfolio-${sessionId}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-            } else {
-                const blob = new Blob([res.data as BlobPart], {type: "application/pdf"});
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `portfolio-${sessionId}.pdf`;
-                a.click();
-                URL.revokeObjectURL(url);
-            }
+
+            const blob =
+                format === "json"
+                    ? new Blob([JSON.stringify(res.data, null, 2)], {
+                        type: "application/json",
+                    })
+                    : new Blob([res.data as BlobPart], {
+                        type: "application/pdf",
+                    });
+
+            const disposition = res.headers["content-disposition"];
+
+            const filename =
+                disposition?.match(/filename="([^"]+)"/)?.[1] ??
+                `portfolio-${sessionId}.${format}`;
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+
+            a.href = url;
+            a.download = filename;
+
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+
+            URL.revokeObjectURL(url);
         } finally {
             setExporting(null);
         }
     };
-
     if (loading) {
         return (
             <div className="max-w-2xl mx-auto space-y-4">

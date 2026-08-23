@@ -53,28 +53,39 @@ module Api
                 end
 
                 unless @portfolio.complete?
-                    return json_error("Portfolio is not ready for export (status: #{@portfolio.generation_status})",
-                                      :unprocessable_entity)
+                    return json_error(
+                        "Portfolio is not ready for export (status: #{@portfolio.generation_status})",
+                        :unprocessable_entity
+                    )
                 end
+
+                filename = [
+                    Current.organization.name,
+                    @portfolio.session.assessment.vacancy.role_title,
+                    @portfolio.session.candidate_name,
+                    "portfolio"
+                ].join("-").parameterize
 
                 if format == 'pdf'
                     vacancy = params[:vacancy_id].present? ? Vacancy.find_by(id: params[:vacancy_id]) : nil
-                    pdf_data = Exports::PdfGenerator.new(portfolio: @portfolio, vacancy: vacancy).call
+                    pdf_data = Exports::PdfGenerator.new(
+                        portfolio: @portfolio,
+                        vacancy: vacancy
+                    ).call
 
                     return send_data pdf_data,
-                                     filename: "portfolio-#{@portfolio.id}.pdf",
-                                     type: 'application/pdf',
-                                     disposition: 'attachment'
+                                     filename: "#{filename}.pdf",
+                                     type: "application/pdf",
+                                     disposition: "attachment"
                 end
 
-                # JSON export
                 vacancy_id = params[:vacancy_id]
                 export_data = build_export_json(@portfolio, vacancy_id)
 
                 send_data export_data.to_json,
-                          filename: "portfolio-#{@portfolio.id}.json",
-                          type: 'application/json',
-                          disposition: 'attachment'
+                          filename: "#{filename}.json",
+                          type: "application/json",
+                          disposition: "attachment"
             end
 
             # POST /api/v1/portfolios/:id/regenerate_fitgap
