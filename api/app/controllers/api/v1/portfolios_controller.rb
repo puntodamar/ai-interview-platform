@@ -185,6 +185,7 @@ module Api
                 {
                     id: portfolio.id,
                     session_id: portfolio.session_id,
+                    vacancy_id: portfolio.session.assessment.vacancy_id,
                     candidate_id: portfolio.candidate_id,
                     generation_status: portfolio.generation_status,
                     generated_at: portfolio.generated_at,

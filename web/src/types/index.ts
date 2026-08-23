@@ -91,6 +91,7 @@ export interface Portfolio {
     id: number;
     session_id: number;
     candidate_id?: number;
+    vacancy_id: number;
     generation_status: "pending" | "generating" | "complete" | "failed";
     generated_at?: string;
     generation_error?: string;

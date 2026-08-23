@@ -60,8 +60,9 @@ export default function PortfolioPage() {
     };
 
     const handleRunFitGap = () => {
-        if (!selectedVacancy || !portfolio) return;
-        navigate(`/assessments/${id}/sessions/${sessionId}/fitgap/${selectedVacancy}`);
+        // if (!selectedVacancy || !portfolio) return;
+        if (!portfolio) return;
+        navigate(`/assessments/${id}/sessions/${sessionId}/fitgap/${portfolio.vacancy_id}`);
     };
 
     const handleExport = async (format: "pdf" | "json") => {
@@ -73,7 +74,8 @@ export default function PortfolioPage() {
             const res = await portfoliosApi.exportPortfolio(
                 portfolio.id,
                 format,
-                selectedVacancy ? Number(selectedVacancy) : undefined
+                // selectedVacancy ? Number(selectedVacancy) : undefined
+                portfolio.vacancy_id
             );
 
             const blob =
@@ -247,19 +249,19 @@ export default function PortfolioPage() {
 
                     {/* Fit/Gap */}
                     <div className="flex items-center gap-3">
-                        <Select value={selectedVacancy} onValueChange={setSelectedVacancy}>
-                            <SelectTrigger className="w-56">
-                                <SelectValue placeholder="Choose vacancy..."/>
-                            </SelectTrigger>
-                            <SelectContent>
-                                {vacancies.map((v) => (
-                                    <SelectItem key={v.id} value={String(v.id)}>
-                                        {v.role_title}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <Button onClick={handleRunFitGap} disabled={!selectedVacancy}>
+                        {/*<Select value={selectedVacancy} onValueChange={setSelectedVacancy}>*/}
+                        {/*    <SelectTrigger className="w-56">*/}
+                        {/*        <SelectValue placeholder="Choose vacancy..."/>*/}
+                        {/*    </SelectTrigger>*/}
+                        {/*    <SelectContent>*/}
+                        {/*        {vacancies.map((v) => (*/}
+                        {/*            <SelectItem key={v.id} value={String(v.id)}>*/}
+                        {/*                {v.role_title}*/}
+                        {/*            </SelectItem>*/}
+                        {/*        ))}*/}
+                        {/*    </SelectContent>*/}
+                        {/*</Select>*/}
+                        <Button onClick={handleRunFitGap} disabled={!portfolio.vacancy_id}>
                             Run Fit/Gap Analysis →
                         </Button>
                     </div>
