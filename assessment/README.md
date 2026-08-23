@@ -34,6 +34,19 @@ The main areas covered are:
 | **P2**   | Noticeable functional or UX problem with a workaround                |
 | **P3**   | Minor usability, presentation, or optimization issue                 |
 
+### P0 — Unauthorized access
+
+#### Problem
+anyone can assess other organization data as long as the login exists
+
+#### Ideal Condition
+this shouldnt happen because this is a MAJOR security risk
+
+#### Fix
+Add user relationship to organization and trace back every request to TenantScope
+
+---
+
 ### P0 — Interview Recovery
 
 #### Problem
